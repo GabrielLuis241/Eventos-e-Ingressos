@@ -1,4 +1,3 @@
-
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,12 +7,11 @@ from .models import Pagamento
 import uuid
 from decimal import Decimal
 
-PRECO_INGRESSO = Decimal('100.00')  # preço fixo por ingresso (exemplo simples)
+PRECO_INGRESSO = Decimal('100.00')  
 
-# Inicia pagamento via Pix: cria um pagamento pendente e retorna um codigo_pix
 @api_view(['POST'])
 def iniciar_pix(request):
-    username = request.data.get('username')  # para simplificar; ideal é pegar do usuário logado
+    username = request.data.get('username')  
     evento_id = request.data.get('evento_id')
     quantidade = int(request.data.get('quantidade', 1))
 
@@ -53,7 +51,6 @@ def iniciar_pix(request):
         'valor_total': str(pagamento.valor_total)
     }, status=201)
 
-# Confirma o Pix: aprova, abate estoque e cria ingresso com QR Code
 @api_view(['POST'])
 def confirmar_pix(request):
     pagamento_id = request.data.get('pagamento_id')
@@ -73,15 +70,12 @@ def confirmar_pix(request):
     if evento.ingressos_disponiveis < pagamento.quantidade:
         return Response({'detail': 'Ingressos insuficientes no momento da confirmação.'}, status=400)
 
-    # Aprova o pagamento
     pagamento.status = 'aprovado'
     pagamento.save()
 
-    # Abate estoque do evento
     evento.ingressos_disponiveis -= pagamento.quantidade
     evento.save()
 
-    # Cria o ingresso e gera um "qr_code" (UUID)
     qr = str(uuid.uuid4())
     Ingresso.objects.create(
         evento=evento,

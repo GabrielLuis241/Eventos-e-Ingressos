@@ -1,5 +1,4 @@
 from django.test import TestCase
-
 class FluxoSimplesTestCase(TestCase):
     def setUp(self):
         self.dados_ingresso = {

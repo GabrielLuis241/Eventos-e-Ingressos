@@ -1,4 +1,3 @@
-
 from django.urls import path
 from .views import iniciar_pix, confirmar_pix
 

@@ -1,4 +1,3 @@
-
 from django.urls import path
 from .views import registrar, login_view, perfil
 

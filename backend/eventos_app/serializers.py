@@ -2,7 +2,6 @@
 from rest_framework import serializers
 from .models import Evento, Ingresso
 
-# Serializer simples para transformar o modelo em JSON e vice-versa
 class EventoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Evento

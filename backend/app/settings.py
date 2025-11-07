@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import os
 
@@ -16,10 +15,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Terceiros
     'rest_framework',
 
-    # Apps do projeto (iniciante)
     'eventos_app',
     'usuarios',
     'pagamentos',
@@ -62,7 +59,7 @@ DATABASES = {
     }
 }
 
-AUTH_PASSWORD_VALIDATORS = []  # simplificado para iniciante
+AUTH_PASSWORD_VALIDATORS = [] 
 
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Fortaleza'
@@ -73,7 +70,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-    # Autenticação simples (sessão do Django)
+
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',

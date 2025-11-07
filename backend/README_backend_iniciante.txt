@@ -1,7 +1,5 @@
 
-# Backend (iniciante e compatível) — Eventos e Ingressos
-
-Este backend é **simples** e foi escrito como se um **iniciante** tivesse feito, mas mantém as **mesmas rotas** `/api/...` para continuar compatível com o front.
+# Backend — Eventos e Ingressos
 
 ## O que tem
 - Cadastro e login simples (sem JWT)
