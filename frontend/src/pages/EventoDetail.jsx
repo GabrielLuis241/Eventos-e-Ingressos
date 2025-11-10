@@ -1,29 +1,11 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+// src/pages/EventoDetail.jsx
+import React from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import './EventoDetail.css';
-import { apiPost } from '../api'; 
 
 export default function EventoDetail() {
   const { id } = useParams();
-
-  const [nome, setNome] = useState('');
-  const [quantidade, setQuantidade] = useState(1);
-  const [mensagem, setMensagem] = useState('');
-  const [mostrarCompra, setMostrarCompra] = useState(false); 
-
-  async function handleCompra() {
-    try {
-      await apiPost('/comprar/', {
-        evento_id: id,
-        nome,
-        quantidade,
-      });
-      setMensagem('Compra realizada com sucesso! ');
-    } catch (error) {
-      console.error('Erro ao comprar ingresso:', error);
-      setMensagem('Erro ao realizar compra. Tente novamente.');
-    }
-  }
+  const navigate = useNavigate();
 
   return (
     <div className="evento-detail">
@@ -44,39 +26,13 @@ export default function EventoDetail() {
           </p>
 
           <button
-            onClick={() => setMostrarCompra(!mostrarCompra)}
             className="btn"
+            onClick={() => navigate(`/evento/${id}/compra`)}
           >
-            {mostrarCompra ? 'Fechar Compra' : 'Comprar Ingresso'}
+            Comprar Ingresso
           </button>
         </div>
       </div>
-
-      {mostrarCompra && (
-        <div id="comprar" className="form-compra">
-          <h3>Comprar ingresso</h3>
-
-          <label>Nome do comprador:</label>
-          <input
-            type="text"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            placeholder="Digite seu nome"
-          />
-
-          <label>Quantidade:</label>
-          <input
-            type="number"
-            min="1"
-            value={quantidade}
-            onChange={(e) => setQuantidade(e.target.value)}
-          />
-
-          <button onClick={handleCompra} className="btn">Confirmar Compra</button>
-
-          {mensagem && <p className="mensagem">{mensagem}</p>}
-        </div>
-      )}
     </div>
   );
 }

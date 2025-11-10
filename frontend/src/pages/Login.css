@@ -1,0 +1,66 @@
+/* src/pages/Login.css */
+.login-container {
+  max-width: 400px;
+  margin: 60px auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+  text-align: center;
+  color: var(--roxo-primario);
+  margin-bottom: 20px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 5px;
+}
+
+.btn {
+  margin-top: 20px;
+  background: var(--roxo-primario);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: #5f22b8;
+}
+
+.login-links {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.mensagem {
+  text-align: center;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.mensagem.sucesso {
+  color: #22b859;
+}
+
+.mensagem.erro {
+  color: #c0392b;
+}

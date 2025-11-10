@@ -1,0 +1,47 @@
+/* src/pages/CompraIngresso.css */
+.compra-container {
+  max-width: 500px;
+  margin: 60px auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.compra-container h2 {
+  color: var(--roxo-primario);
+  margin-bottom: 20px;
+}
+
+.compra-container label {
+  display: block;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+.compra-container input,
+.compra-container select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 5px;
+}
+
+.compra-container .btn {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.mensagem {
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+.mensagem.sucesso {
+  color: #22b859;
+}
+
+.mensagem.erro {
+  color: #c0392b;
+}

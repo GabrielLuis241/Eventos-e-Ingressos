@@ -1,0 +1,41 @@
+.confirmacao-container {
+  max-width: 600px;
+  margin: 80px auto;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(106, 13, 173, 0.2);
+  text-align: center;
+}
+
+.confirmacao-container h2 {
+  color: #6A0DAD;
+  font-size: 24px;
+  margin-bottom: 1rem;
+}
+
+.confirmacao-container p {
+  color: #444;
+  margin-bottom: 1.5rem;
+}
+
+.qr-code {
+  margin: 20px auto;
+  display: block;
+  width: 200px;
+  height: 200px;
+}
+
+.acoes button {
+  margin: 0.5rem;
+  padding: 12px 20px;
+  background: #6A0DAD;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.acoes button:hover {
+  background: #580b9a;
+}

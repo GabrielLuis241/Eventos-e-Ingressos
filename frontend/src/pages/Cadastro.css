@@ -1,0 +1,48 @@
+.cadastro-container {
+  max-width: 400px;
+  margin: 80px auto;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(106, 13, 173, 0.2);
+  text-align: center;
+}
+
+.cadastro-container h2 {
+  color: #6A0DAD;
+  margin-bottom: 1rem;
+}
+
+.cadastro-container input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.cadastro-container button {
+  width: 100%;
+  padding: 12px;
+  background-color: #6A0DAD;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.cadastro-container button:hover {
+  background-color: #580b9a;
+}
+
+.voltar-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #6A0DAD;
+  text-decoration: none;
+}
+
+.voltar-link:hover {
+  text-decoration: underline;
+}
