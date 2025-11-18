@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
 
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -10,11 +11,22 @@ export default function Login() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (email === "admin@email.com" && senha === "123") {
-      navigate("/"); // volta pra home
-    } else {
-      setErro("E-mail ou senha incorretos");
+
+    const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+    const adms = JSON.parse(localStorage.getItem("adms")) || [];
+
+    const usuarioEncontrado =
+      usuarios.find((u) => u.email === email && u.senha === senha) ||
+      adms.find((a) => a.email === email && a.senha === senha);
+
+    if (usuarioEncontrado) {
+      localStorage.setItem("usuarioLogado", JSON.stringify(usuarioEncontrado));
+
+      navigate("/"); 
+      return;
     }
+
+    setErro("E-mail ou senha incorretos");
   };
 
   return (
@@ -37,6 +49,7 @@ export default function Login() {
         />
         <button type="submit">Entrar</button>
       </form>
+
       {erro && <p className="erro">{erro}</p>}
 
       <div className="cadastro-links">

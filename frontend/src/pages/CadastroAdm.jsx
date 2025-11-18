@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Cadastro.css";
 
+
+
 export default function CadastroAdm() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
