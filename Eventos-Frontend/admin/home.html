@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Home Admin - Sistema de Eventos</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #e3e9ff;
+      margin: 0;
+      padding: 0;
+      color: #222;
+    }
+    #admin-app {
+      max-width: 900px;
+      margin: 2em auto;
+      background: #fff;
+      border-radius: 32px;
+      padding: 3em 2em 2.5em 2em;
+      box-shadow: 0 6px 20px rgba(101,115,126,0.25);
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.8em;
+    }
+    header h1 {
+      color: #5c6bc0;
+      font-size: 2.2em;
+      margin: 0;
+      font-weight: 700;
+    }
+    header a {
+      color: #5c6bc0;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1em;
+    }
+    nav.tabs {
+      display: flex;
+      gap: 2em;
+      margin-bottom: 2em;
+      border-bottom: 2px solid #d1d8f7;
+    }
+    nav.tabs button {
+      background: none;
+      border: none;
+      padding: 1em 1.8em;
+      cursor: pointer;
+      font-size: 1.25em;
+      font-weight: 700;
+      border-bottom: 4px solid transparent;
+      color: #65737e;
+      transition: all 0.3s ease;
+      border-radius: 12px 12px 0 0;
+    }
+    nav.tabs button.active {
+      color: #5c6bc0;
+      border-color: #5c6bc0;
+      background: #ebf0ff;
+    }
+
+    h2 {
+      color: #5c6bc0;
+      margin-bottom: 1.2em;
+    }
+    form label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.8em;
+      font-size: 1.02em;
+    }
+    form input, form textarea {
+      width: 100%;
+      padding: 0.8em 1em;
+      border-radius: 14px;
+      border: 1px solid #cfd8dc;
+      font-size: 1.05em;
+      margin-bottom: 1.3em;
+      box-sizing: border-box;
+      transition: border-color 0.3s ease;
+    }
+    form textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    form input:focus, form textarea:focus {
+      border-color: #5c6bc0;
+      outline: none;
+    }
+    button.submit-btn {
+      background: #5c6bc0;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.2em;
+      padding: 0.9em 2.5em;
+      border: none;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 0.6em;
+    }
+    button.submit-btn:hover {
+      background: #48bfe3;
+    }
+    .ingresso-group {
+      border: 1px solid #cfd8dc;
+      background: #f7faff;
+      padding: 1.2em 1em 1.8em 1em;
+      border-radius: 20px;
+      margin-bottom: 1.8em;
+    }
+    .ingresso-group label {
+      margin-bottom: 1em;
+      font-weight: 600;
+      font-size: 1.05em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1em;
+      margin-top: 2em;
+    }
+    th, td {
+      border: 1px solid #cfd8dc;
+      padding: 0.8em 1.2em;
+      text-align: left;
+    }
+    th {
+      background-color: #d1d8f7;
+      color: #222;
+    }
+  </style>
+</head>
+<body>
+  <div id="admin-app">
+    <header>
+      <h1>Área do Administrador</h1>
+      <a href="../login.html">Logout</a>
+    </header>
+
+    <nav class="tabs">
+      <button :class="{active: abaAtual === 'criar'}" @click="abaAtual = 'criar'">Criar Eventos</button>
+      <button :class="{active: abaAtual === 'relatorios'}" @click="abaAtual = 'relatorios'">Relatórios</button>
+    </nav>
+
+    <section v-if="abaAtual === 'criar'">
+      <form @submit.prevent="salvarEvento">
+        <h2>Cadastro de Evento</h2>
+        <label>Nome do Evento:
+          <input v-model="evento.nome" type="text" required />
+        </label>
+        <label>Local:
+          <input v-model="evento.local" type="text" required />
+        </label>
+        <label>Data:
+          <input v-model="evento.data" type="date" required />
+        </label>
+        <label>Descrição:
+          <textarea v-model="evento.descricao" required></textarea>
+        </label>
+
+        <h3>Ingressos</h3>
+        <div v-for="(ingresso, idx) in ingressos" :key="idx" class="ingresso-group">
+          <label>Tipo:
+            <input v-model="ingresso.tipo" type="text" placeholder="Ex: Inteiro, Meia" required />
+          </label>
+          <label>Valor (R$):
+            <input v-model.number="ingresso.valor" type="number" min="0" step="0.01" required />
+          </label>
+          <label>Quantidade:
+            <input v-model.number="ingresso.quantidade" type="number" min="1" required />
+          </label>
+          <button type="button" @click="removerIngresso(idx)" style="background:#d9534f;color:#fff;padding:0.35em 1.1em;border:none;border-radius:14px;cursor:pointer;">Remover ingresso</button>
+        </div>
+        <button type="button" @click="adicionarIngresso" style="background:#5c6bc0;color:#fff;border:none;padding:0.6em 1.5em;border-radius:18px;cursor:pointer;margin-bottom:1.5em;">+ Adicionar ingresso</button>
+        <br />
+        <button class="submit-btn" type="submit">Salvar Evento + Ingressos</button>
+      </form>
+    </section>
+
+    <section v-else-if="abaAtual === 'relatorios'">
+      <h2>Relatórios de Vendas</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Evento</th>
+            <th>Ingressos Vendidos</th>
+            <th>Total Arrecadado (R$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="relatorio in relatorios" :key="relatorio.evento">
+            <td>{{ relatorio.evento }}</td>
+            <td>{{ relatorio.ingressosVendidos }}</td>
+            <td>{{ relatorio.total.toFixed(2) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+  
+  <script>
+    const { createApp } = Vue;
+    createApp({
+      data() {
+        return {
+          abaAtual: 'criar',
+          evento: { nome: '', local: '', data: '', descricao: '' },
+          ingressos: [{ tipo: '', valor: null, quantidade: null }],
+          relatorios: [
+            { evento: 'Concerto Rock', ingressosVendidos: 150, total: 9000 },
+            { evento: 'Simpósio Tecnologia', ingressosVendidos: 80, total: 4000 }
+          ]
+        };
+      },
+      methods: {
+        adicionarIngresso() {
+          this.ingressos.push({ tipo: '', valor: null, quantidade: null });
+        },
+        removerIngresso(idx) {
+          this.ingressos.splice(idx, 1);
+        },
+        salvarEvento() {
+          if(!this.evento.nome || !this.evento.local || !this.evento.data || !this.evento.descricao) {
+            alert('Preencha todos os campos do evento.');
+            return;
+          }
+          if(this.ingressos.length === 0) {
+            alert('Adicione pelo menos um ingresso.');
+            return;
+          }
+          for(const ingresso of this.ingressos) {
+            if(!ingresso.tipo || ingresso.valor === null || ingresso.quantidade === null) {
+              alert('Preencha todos os campos dos ingressos corretamente.');
+              return;
+            }
+          }
+          alert(`Evento "${this.evento.nome}" e ingressos salvos!`);
+          // Limpar formulário
+          this.evento = { nome: '', local: '', data: '', descricao: '' };
+          this.ingressos = [{ tipo: '', valor: null, quantidade: null }];
+        }
+      }
+    }).mount('#admin-app');
+  </script>
+</body>
+</html>

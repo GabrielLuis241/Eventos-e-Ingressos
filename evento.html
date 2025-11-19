@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalhes do Evento</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Detalhes do Evento</h1>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="cadastrar-evento.html">Cadastrar Evento</a>
+    </nav>
+  </header>
+  <main>
+    <section class="event-info">
+      <h2>Concerto Rock</h2>
+      <p>Local: Auditório Central</p>
+      <p>Data: 15/10/2025</p>
+      <p>Show especial de rock com bandas renomadas.</p>
+    </section>
+    <section class="ticket-form">
+      <h3>Cadastrar Ingresso</h3>
+      <form>
+        <label>Tipo:<input type="text" name="tipo"></label>
+        <label>Preço:<input type="number" name="preco" step="0.01"></label>
+        <button type="submit">Adicionar</button>
+      </form>
+    </section>
+    <section class="sell-ticket">
+      <h3>Comprar Ingresso</h3>
+      <form>
+        <label>Disponíveis: 100</label>
+        <label>Quantidade:<input type="number" name="quantidade" min="1"></label>
+        <button type="submit">Comprar</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

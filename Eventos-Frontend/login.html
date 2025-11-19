@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - Sistema de Eventos</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #5c6bc0, #48bfe3);
+      display: flex;
+      height: 100vh;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      color: #222;
+    }
+    #login-app {
+      background: #fff;
+      padding: 3em 3.5em;
+      border-radius: 30px;
+      box-shadow: 0 10px 40px rgba(55, 90, 255, 0.3);
+      width: 360px;
+    }
+    #login-app h1 {
+      text-align: center;
+      margin-bottom: 2em;
+      color: #5c6bc0;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 0.5em;
+      font-size: 1.1em;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.75em 1em;
+      margin-bottom: 1.4em;
+      border: 2px solid #cfd8dc;
+      border-radius: 14px;
+      font-size: 1.05em;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+    input:focus, select:focus {
+      border-color: #5c6bc0;
+      outline: none;
+    }
+    button {
+      width: 100%;
+      background: #5c6bc0;
+      color: white;
+      font-weight: 900;
+      font-size: 1.25em;
+      padding: 0.75em 0;
+      border: none;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #48bfe3;
+    }
+  </style>
+</head>
+<body>
+  <div id="login-app">
+    <h1>Login</h1>
+    <form @submit.prevent="entrar">
+      <label for="usuario">Usuário</label>
+      <input id="usuario" v-model="usuario" type="text" required />
+
+      <label for="senha">Senha</label>
+      <input id="senha" v-model="senha" type="password" required />
+
+      <label for="tipo">Tipo de Acesso</label>
+      <select id="tipo" v-model="tipo" required>
+        <option value="" disabled>Selecione...</option>
+        <option value="adm">Administrador</option>
+        <option value="usuario">Usuário</option>
+      </select>
+
+      <button type="submit">Entrar</button>
+    </form>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+    createApp({
+      data() {
+        return {
+          usuario: '',
+          senha: '',
+          tipo: ''
+        };
+      },
+      methods: {
+        entrar() {
+          if(this.tipo === 'adm') {
+            window.location.href = 'admin/home.html';
+          } else if(this.tipo === 'usuario') {
+            window.location.href = 'usuario/eventos.html';
+          } else {
+            alert('Selecione um tipo de acesso válido!');
+          }
+        }
+      }
+    }).mount('#login-app');
+  </script>
+</body>
+</html>

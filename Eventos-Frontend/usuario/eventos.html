@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Eventos - Usuário</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #e3e9ff;
+      margin: 0;
+      padding: 0;
+      color: #222;
+    }
+    #usuario-app {
+      max-width: 900px;
+      margin: 2em auto;
+      background: white;
+      border-radius: 32px;
+      padding: 3em 2em 2.5em 2em;
+      box-shadow: 0 6px 32px #6565b020;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.8em;
+    }
+    header h1 {
+      color: #5c6bc0;
+      font-size: 2.2em;
+      margin: 0;
+      font-weight: 700;
+    }
+    header a {
+      color: #5c6bc0;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1em;
+    }
+    .event-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2em;
+      justify-content: center;
+    }
+    .event-card {
+      background: linear-gradient(120deg, #eceff7 60%, #e0e7ff 100%);
+      border-radius: 24px;
+      padding: 1.5em;
+      box-shadow: 0 4px 20px #00000020;
+      min-width: 280px;
+      max-width: 300px;
+      cursor: pointer;
+      transition: box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .event-card:hover {
+      box-shadow: 0 8px 32px #65737e38;
+    }
+    .event-card h2 {
+      margin: 0 0 0.5em 0;
+      font-size: 1.8em;
+    }
+    .event-card p {
+      margin: 0 0 1em 0;
+      font-size: 1.05em;
+      color: #555;
+    }
+    .btn-primary {
+      background: #48bfe3;
+      color: white;
+      font-weight: 700;
+      padding: 0.7em 1.4em;
+      border: none;
+      border-radius: 18px;
+      cursor: pointer;
+      font-size: 1em;
+      align-self: flex-start;
+      transition: background 0.3s ease;
+    }
+    .btn-primary:hover {
+      background: #5c6bc0;
+    }
+    .details-section {
+      padding: 1.5em;
+      border-radius: 24px;
+      background: #f0f4ff;
+      box-shadow: 0 2px 10px #65737e22;
+      margin-bottom: 2em;
+    }
+    .details-section h2 {
+      margin-top: 0;
+      color: #5c6bc0;
+      font-size: 2em;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.8em;
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+    input[type="number"] {
+      width: 80px;
+      padding: 0.5em;
+      border-radius: 12px;
+      border: 1px solid #cfd8dc;
+      font-size: 1em;
+      margin-top: 0.3em;
+      box-sizing: border-box;
+    }
+    button.submit-btn {
+      background: #5c6bc0;
+      color: white;
+      border: none;
+      border-radius: 18px;
+      font-weight: 700;
+      padding: 0.8em 2.3em;
+      cursor: pointer;
+      font-size: 1.1em;
+      transition: background 0.3s ease;
+      margin-top: 1em;
+    }
+    button.submit-btn:hover {
+      background: #48bfe3;
+    }
+  </style>
+</head>
+<body>
+  <div id="usuario-app">
+    <header>
+      <h1>Eventos Disponíveis</h1>
+      <nav>
+        <a href="../login.html" style="color:#5c6bc0;">Logout</a>
+      </nav>
+    </header>
+
+    <section v-if="!eventoSelecionado" class="event-list">
+      <article 
+        v-for="evento in eventos" 
+        :key="evento.id" 
+        class="event-card" 
+        @click="selecionarEvento(evento)">
+        <h2>{{ evento.nome }}</h2>
+        <p>Local: {{ evento.local }}</p>
+        <p>Data: {{ formatarData(evento.data) }}</p>
+        <button class="btn-primary" @click.stop="selecionarEvento(evento)">Detalhes</button>
+      </article>
+    </section>
+
+    <section v-else class="details-section">
+      <button @click="eventoSelecionado = null" style="margin-bottom: 1em; background:none; border:none; color:#5c6bc0; font-weight: 700; cursor: pointer;">← Voltar à lista</button>
+      <h2>{{ eventoSelecionado.nome }}</h2>
+      <p><strong>Local:</strong> {{ eventoSelecionado.local }}</p>
+      <p><strong>Data:</strong> {{ formatarData(eventoSelecionado.data) }}</p>
+      <p><strong>Descrição:</strong> {{ eventoSelecionado.descricao }}</p>
+
+      <h3>Comprar Ingressos</h3>
+      <form @submit.prevent="comprarIngressos">
+        <label for="tipoIngresso">Tipo de ingresso:</label>
+        <select v-model="tipoIngressoSelecionado" id="tipoIngresso" required>
+          <option disabled value="">Selecione</option>
+          <option v-for="ing in eventoSelecionado.ingressos" :key="ing.tipo" :value="ing.tipo">
+            {{ ing.tipo }} - R$ {{ ing.valor.toFixed(2) }} (Disponível: {{ ing.quantidade }})
+          </option>
+        </select>
+
+        <label for="quantidadeIngresso">Quantidade:</label>
+        <input 
+          type="number" 
+          id="quantidadeIngresso" 
+          min="1" 
+          :max="quantidadeMaxima" 
+          v-model.number="quantidadeIngresso" 
+          required />
+
+        <button type="submit" class="submit-btn">Comprar</button>
+      </form>
+    </section>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          eventos: [
+            {
+              id: 1,
+              nome: 'Concerto Rock',
+              local: 'Auditório Central',
+              data: '2025-10-15',
+              descricao: 'Show especial de rock com bandas renomadas.',
+              ingressos: [
+                { tipo: 'Inteiro', valor: 120.00, quantidade: 50 },
+                { tipo: 'Meia', valor: 60.00, quantidade: 30 }
+              ]
+            },
+            {
+              id: 2,
+              nome: 'Simpósio Tecnologia',
+              local: 'Centro de Convenções',
+              data: '2025-12-10',
+              descricao: 'Palestras e workshops sobre tecnologia de ponta.',
+              ingressos: [
+                { tipo: 'Geral', valor: 50.00, quantidade: 100 }
+              ]
+            }
+          ],
+          eventoSelecionado: null,
+          tipoIngressoSelecionado: '',
+          quantidadeIngresso: 1
+        };
+      },
+      computed: {
+        quantidadeMaxima() {
+          if (!this.eventoSelecionado || !this.tipoIngressoSelecionado) return 1;
+          const ingresso = this.eventoSelecionado.ingressos.find(i => i.tipo === this.tipoIngressoSelecionado);
+          return ingresso ? ingresso.quantidade : 1;
+        }
+      },
+      methods: {
+        selecionarEvento(evento) {
+          this.eventoSelecionado = evento;
+          this.tipoIngressoSelecionado = '';
+          this.quantidadeIngresso = 1;
+        },
+        formatarData(data) {
+          const d = new Date(data);
+          return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+        },
+        comprarIngressos() {
+          const ingresso = this.eventoSelecionado.ingressos.find(i => i.tipo === this.tipoIngressoSelecionado);
+          if (!ingresso) {
+            alert('Selecione um tipo de ingresso válido.');
+            return;
+          }
+          if (this.quantidadeIngresso < 1 || this.quantidadeIngresso > ingresso.quantidade) {
+            alert('Quantidade inválida.');
+            return;
+          }
+          alert(`Compra realizada!\nEvento: ${this.eventoSelecionado.nome}\nIngresso: ${this.tipoIngressoSelecionado}\nQuantidade: ${this.quantidadeIngresso}`);
+          
+          ingresso.quantidade -= this.quantidadeIngresso;
+          this.tipoIngressoSelecionado = '';
+          this.quantidadeIngresso = 1;
+        }
+      }
+    }).mount('#usuario-app');
+  </script>
+</body>
+</html>
