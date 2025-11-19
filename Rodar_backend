@@ -1,0 +1,17 @@
+1 - Criar e ativar o venv:
+
+        python -m venv venv
+        venv\Scripts\activate 
+
+2 - Instalar dependências:
+       
+        pip install -r requirements.txt
+
+3 - Rodar migrações:
+
+        python manage.py migrate
+
+4 - Rodar servidor:
+        python manage.py runserver
+
+"http://127.0.0.1:8000/ pra ver o backend rodando"
