@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+
 import Login from './pages/Login';
 import CadastroUsuario from './pages/CadastroUsuario';
 import CadastroAdm from './pages/CadastroAdm';
@@ -7,6 +8,7 @@ import CadastroAdm from './pages/CadastroAdm';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
+import GerenciarEventos from './pages/GerenciarEventos';
 import Home from './pages/Home';
 import EventoDetail from './pages/EventoDetail';
 
@@ -15,7 +17,7 @@ import PagamentoCartao from './pages/PagamentoCartao';
 import PagamentoPix from './pages/PagamentoPix';
 import ConfirmacaoCompra from './pages/ConfirmacaoCompra';
 
-
+import EditarEvento from './pages/EditarEvento';   
 
 import './App.css';
 
@@ -29,6 +31,8 @@ function App() {
           <Route path="/" element={<Home />} />
 
           <Route path="/evento/:id" element={<EventoDetail />} />
+          <Route path="/admin/eventos" element={<GerenciarEventos />} />
+          <Route path="/admin/eventos/editar/:id" element={<EditarEvento />} />
 
           <Route path="/evento/:id/compra" element={<CompraIngresso />} />
 
@@ -43,7 +47,6 @@ function App() {
         </Routes>
       </main>
 
-      {/* Rodapé fixo */}
       <Footer />
     </div>
   );

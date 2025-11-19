@@ -1,0 +1,121 @@
+.gerenciar-container {
+  max-width: 1000px;
+  margin: 30px auto;
+  padding: 20px;
+}
+
+.titulo {
+  text-align: center;
+  color: #6A0DAD;
+  margin-bottom: 20px;
+}
+
+.btn-roxo {
+  background: #6A0DAD;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.btn-roxo:hover {
+  background: #580b98;
+}
+
+.lista-eventos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.card-evento {
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  width: 230px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  position: relative;
+}
+
+.card-evento img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.card-evento .btn-excluir {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: none;
+  background: red;
+  color: white;
+  border-radius: 8px;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background: white;
+  width: 600px;
+  padding: 20px;
+  border-radius: 14px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.fechar {
+  float: right;
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.col {
+  flex: 1;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 5px;
+}
+.botoes-modal {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn-cancelar {
+  background: #b30000;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn-cancelar:hover {
+  background: #8c0000;
+}
