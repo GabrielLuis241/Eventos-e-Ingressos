@@ -1,3 +1,6 @@
+# This file must be used with "source bin/activate" *from bash*
+# you cannot run it directly
+
 deactivate () {
     # reset old environment variables
     if [ -n "${_OLD_VIRTUAL_PATH:-}" ] ; then
@@ -32,7 +35,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\doral\Eventos-e-Ingressos\backend\venv"
+VIRTUAL_ENV="C:\Users\doral\Downloads\Eventos-e-Ingressos\backend\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
