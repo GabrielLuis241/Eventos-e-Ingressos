@@ -56,9 +56,6 @@ export default function Login() {
         <p>
           Não tem conta? <Link to="/cadastro/usuario">Cadastrar Usuário</Link>
         </p>
-        <p>
-          É administrador? <Link to="/cadastro/adm">Cadastrar ADM</Link>
-        </p>
       </div>
     </div>
   );

@@ -21,7 +21,7 @@ export default function Home() {
         horario: '19:00',
         local: 'São Luís - MA',
         ingressos_disponiveis: 300,
-        imagem: 'https://source.unsplash.com/800x500/?concert,party'
+        imagem: 'https://pixabay.com/pt/photos/perspectiva-ponte-de-madeira-7600797/'
       },
       {
         id: 2,

@@ -30,16 +30,10 @@ export default function EventoDetail() {
 
   return (
     <div className="evento-detail">
-      <Link to="/" className="back-link">← Voltar</Link>
-
-      {/* 🟣 Botão NOVO: Editar Evento */}
-      <Link 
-        to={`/admin/eventos/editar/${id}`} 
-        className="btn-editar"
-      >
-        ✏ Editar Evento
-      </Link>
-
+     <Link to="/" className="btn-voltar">
+        ← Voltar
+     </Link>
+  
       <div className="detail-grid">
         <img
           src={`https://source.unsplash.com/800x500/?event,${id}`}
@@ -56,10 +50,10 @@ export default function EventoDetail() {
 
           <button
             onClick={() => setMostrarCompra(!mostrarCompra)}
-            className="btn"
-          >
+            className="btn">
             {mostrarCompra ? 'Fechar Compra' : 'Comprar Ingresso'}
           </button>
+
         </div>
       </div>
 
@@ -92,25 +86,6 @@ export default function EventoDetail() {
           )}
         </div>
       )}
-
-      {/* 🟣 CSS embutido */}
-      <style jsx>{`
-        .btn-editar {
-          display: inline-block;
-          background: #6A0DAD;
-          color: white;
-          padding: 10px 15px;
-          border-radius: 8px;
-          text-decoration: none;
-          margin-bottom: 15px;
-          font-size: 15px;
-          font-weight: bold;
-        }
-
-        .btn-editar:hover {
-          background: #530c88;
-        }
-      `}</style>
     </div>
   );
 }

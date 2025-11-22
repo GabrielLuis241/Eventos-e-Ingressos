@@ -8,11 +8,8 @@ export default function Header() {
       <div className="container header-content">
         <Link to="/" className="logo">EVENTOS+</Link>
         <nav className="nav-links">
-          <NavLink to="/" end>Início</NavLink>
-          <NavLink to="/#eventos">Eventos</NavLink>
-          <NavLink to="/#contato">Contato</NavLink>
-          <Link to="/admin/eventos" className="btn-admin">Modo Admin</Link>
-          <Link to="/login" className="btn">Entrar</Link>
+          <a href="/" className="nav-link">Início</a>
+          <a href="/login" className="nav-link">Entrar</a>
         </nav>
       </div>
     </header>
