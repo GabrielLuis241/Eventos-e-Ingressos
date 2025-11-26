@@ -4,10 +4,10 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 def home(request):
-    return JsonResponse({"status": "online", "message": "API Eventos rodando! 🚀"})
+    return JsonResponse({"status": "online", "message": "API Eventos rodando! "})
 
 urlpatterns = [
-    path('', home),  # 👈 rota raiz
+    path('', home),
     
     path('admin/', admin.site.urls),
     
