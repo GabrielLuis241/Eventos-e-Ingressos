@@ -1,28 +1,24 @@
 import React, { useEffect, useState } from "react";
 import "./GerenciarEventos.css";
-import { apiGet, apiPost } from "../api";
+import { listarEventos, criarEvento, removerEvento } from "../api";
 
 export default function GerenciarEventos() {
   const [eventos, setEventos] = useState([]);
   const [mostrarModal, setMostrarModal] = useState(false);
 
   const [form, setForm] = useState({
-    titulo: "",
-    categoria: "",
-    data: "",
-    hora: "",
-    local: "",
-    cidade: "",
-    preco: "",
-    organizador: "",
-    ingressos: "",
-    imagem: "",
+    nome: "",
     descricao: "",
+    data: "",
+    horario: "",
+    local: "",
+    ingressos_disponiveis: 0,
+    imagem: "",
   });
 
   useEffect(() => {
-    apiGet("/eventos/")
-      .then((res) => setEventos(res))
+    listarEventos()
+      .then(setEventos)
       .catch(() => console.warn("Não foi possível carregar eventos."));
   }, []);
 
@@ -30,28 +26,49 @@ export default function GerenciarEventos() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  async function criarEvento(e) {
+  async function handleCriarEvento(e) {
     e.preventDefault();
 
+    const payload = {
+      nome: form.nome,
+      descricao: form.descricao,
+      data: form.data,
+      horario: form.horario,
+      local: form.local,
+      ingressos_disponiveis: Number(form.ingressos_disponiveis || 0),
+      imagem: form.imagem,
+    };
+
     try {
-      await apiPost("/eventos/criar/", form);
+      const novo = await criarEvento(payload);
+      setEventos((prev) => [...prev, novo]);
       alert("Evento criado com sucesso!");
       setMostrarModal(false);
+      setForm({
+        nome: "",
+        descricao: "",
+        data: "",
+        horario: "",
+        local: "",
+        ingressos_disponiveis: 0,
+        imagem: "",
+      });
     } catch (err) {
       alert("Erro ao criar evento.");
       console.error(err);
     }
   }
 
-  async function excluirEvento(id) {
+  async function handleExcluirEvento(id) {
     if (!window.confirm("Tem certeza que deseja excluir este evento?")) return;
 
     try {
-      await apiPost(`/eventos/remover/${id}/`);
-      setEventos(eventos.filter((ev) => ev.id !== id));
+      await removerEvento(id);
+      setEventos((prev) => prev.filter((ev) => ev.id !== id));
       alert("Evento removido!");
     } catch (err) {
       alert("Erro ao excluir evento.");
+      console.error(err);
     }
   }
 
@@ -66,14 +83,19 @@ export default function GerenciarEventos() {
       <div className="lista-eventos">
         {eventos.map((evento) => (
           <div key={evento.id} className="card-evento">
-            <img src={evento.imagem} alt={evento.titulo} />
+            {evento.imagem && (
+              <img src={evento.imagem} alt={evento.nome} />
+            )}
             <div className="info">
-              <h3>{evento.titulo}</h3>
-              <p>{evento.data} — {evento.hora}</p>
+              <h3>{evento.nome}</h3>
+              <p>
+                {evento.data} — {evento.horario}
+              </p>
+              <p>{evento.local}</p>
             </div>
 
             <button
-              onClick={() => excluirEvento(evento.id)}
+              onClick={() => handleExcluirEvento(evento.id)}
               className="btn-excluir"
             >
               🗑
@@ -82,7 +104,6 @@ export default function GerenciarEventos() {
         ))}
       </div>
 
-      {/* MODAL */}
       {mostrarModal && (
         <div className="modal-bg">
           <div className="modal">
@@ -92,48 +113,14 @@ export default function GerenciarEventos() {
 
             <h2>Criar Novo Evento</h2>
 
-            <form onSubmit={criarEvento} className="form-modal">
+            <form onSubmit={handleCriarEvento} className="form-modal">
               <div className="row">
                 <div className="col">
-                  <label>Título do Evento *</label>
+                  <label>Nome do Evento *</label>
                   <input
                     type="text"
-                    name="titulo"
-                    value={form.titulo}
-                    onChange={atualizarForm}
-                    required
-                  />
-                </div>
-
-                <div className="col">
-                  <label>Organizador</label>
-                  <input
-                    type="text"
-                    name="organizador"
-                    value={form.organizador}
-                    onChange={atualizarForm}
-                  />
-                </div>
-              </div>
-
-              <div className="row">
-                <div className="col">
-                  <label>Categoria *</label>
-                  <input
-                    type="text"
-                    name="categoria"
-                    value={form.categoria}
-                    onChange={atualizarForm}
-                    required
-                  />
-                </div>
-
-                <div className="col">
-                  <label>Horário *</label>
-                  <input
-                    type="time"
-                    name="hora"
-                    value={form.hora}
+                    name="nome"
+                    value={form.nome}
                     onChange={atualizarForm}
                     required
                   />
@@ -153,11 +140,11 @@ export default function GerenciarEventos() {
                 </div>
 
                 <div className="col">
-                  <label>Cidade *</label>
+                  <label>Horário *</label>
                   <input
-                    type="text"
-                    name="cidade"
-                    value={form.cidade}
+                    type="time"
+                    name="horario"
+                    value={form.horario}
                     onChange={atualizarForm}
                     required
                   />
@@ -180,30 +167,14 @@ export default function GerenciarEventos() {
                   <label>Ingressos Disponíveis *</label>
                   <input
                     type="number"
-                    name="ingressos"
-                    value={form.ingressos}
+                    name="ingressos_disponiveis"
+                    value={form.ingressos_disponiveis}
                     onChange={atualizarForm}
                     required
+                    min="0"
                   />
                 </div>
               </div>
-
-              <label>Preço (R$) *</label>
-              <input
-                type="number"
-                name="preco"
-                value={form.preco}
-                onChange={atualizarForm}
-                required
-              />
-
-              <label>URL da Imagem</label>
-              <input
-                type="text"
-                name="imagem"
-                value={form.imagem}
-                onChange={atualizarForm}
-              />
 
               <label>Descrição</label>
               <textarea
@@ -212,22 +183,27 @@ export default function GerenciarEventos() {
                 onChange={atualizarForm}
               />
 
-             <div className="botoes-modal">
- 
-           <button type="submit" className="btn-roxo">
-             Criar Evento
-           </button>
+              <label>URL da Imagem (opcional)</label>
+              <input
+                type="text"
+                name="imagem"
+                value={form.imagem}
+                onChange={atualizarForm}
+              />
 
+              <div className="botoes-modal">
+                <button type="submit" className="btn-roxo">
+                  Criar Evento
+                </button>
 
-           <button
-               type="button"
-               className="btn-cancelar"
-               onClick={() => setMostrarModal(false)}
-           >
-              Cancelar Evento
-           </button>
-             </div>
-
+                <button
+                  type="button"
+                  className="btn-cancelar"
+                  onClick={() => setMostrarModal(false)}
+                >
+                  Cancelar
+                </button>
+              </div>
             </form>
           </div>
         </div>

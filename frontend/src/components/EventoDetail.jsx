@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { apiGet, apiPost } from '../api';
+import './EventoDetail.css';
 
 export default function EventoDetail() {
   const { id } = useParams();
@@ -8,38 +9,20 @@ export default function EventoDetail() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
 
-  const [quantidade, setQuantidade] = useState(1);
+  const [quantidade, setQuantidade] = useState(1);  
   const [comprador, setComprador] = useState('');
   const [comprando, setComprando] = useState(false);
   const [mensagem, setMensagem] = useState(null);
 
-  const dadosTeste = {
-    1: {
-      id: 1,
-      nome: 'Show de Rock',
-      descricao: 'Um show incrível de rock!',
-      data: '2025-11-15',
-      horario: '20:00',
-      local: 'Arena Central',
-      ingressos_disponiveis: 100,
-      imagem: 'https://via.placeholder.com/600x320?text=Show+de+Rock'
-    },
-    2: {
-      id: 2,
-      nome: 'Festival de Música',
-      descricao: 'Festival com várias bandas',
-      data: '2025-12-01',
-      horario: '18:00',
-      local: 'Parque das Flores',
-      ingressos_disponiveis: 500,
-      imagem: 'https://via.placeholder.com/600x320?text=Festival'
-    }
-  };
+  // Verifica se usuário está logado no localStorage
+  const usuarioLogado = localStorage.getItem("usuarioLogado");
+  const estaLogado = !!usuarioLogado;
+
+  const navigate = useNavigate(); // Hook para redirecionamento
 
   useEffect(() => {
     let mounted = true;
-    
-    // Tenta buscar da API, se falhar usa dados de teste
+
     apiGet(`/eventos/${id}/`)
       .then(data => {
         if (mounted) {
@@ -49,18 +32,12 @@ export default function EventoDetail() {
       })
       .catch(e => {
         if (mounted) {
-          console.warn('Usando dados de teste:', e.message);
-          const eventoMockado = dadosTeste[id];
-          if (eventoMockado) {
-            setEvento(eventoMockado);
-          } else {
-            setErro('Evento não encontrado');
-          }
+          setErro('Erro ao carregar evento');
           setLoading(false);
         }
       });
-    
-    return () => (mounted = false);
+
+    return () => { mounted = false; };
   }, [id]);
 
   if (loading) return <div>Carregando evento...</div>;
@@ -71,10 +48,13 @@ export default function EventoDetail() {
     e.preventDefault();
     setMensagem(null);
 
-    if (quantidade < 1) { setMensagem('Quantidade mínima é 1'); return; }
-    if (quantidade > evento.ingressos_disponiveis) { 
-      setMensagem('Quantidade maior que ingressos disponíveis'); 
-      return; 
+    if (quantidade < 1) {
+      setMensagem('Quantidade mínima é 1');
+      return;
+    }
+    if (quantidade > evento.ingressos_disponiveis) {
+      setMensagem('Quantidade maior que ingressos disponíveis');
+      return;
     }
 
     setComprando(true);
@@ -86,10 +66,14 @@ export default function EventoDetail() {
       };
       const resp = await apiPost('/ingressos/', body);
       setMensagem(`Ingresso(s) comprado(s)! ID: ${resp.id || '—'}`);
-      setEvento(prev => ({ 
-        ...prev, 
-        ingressos_disponiveis: prev.ingressos_disponiveis - quantidade 
+      setEvento(prev => ({
+        ...prev,
+        ingressos_disponiveis: prev.ingressos_disponiveis - quantidade
       }));
+      setQuantidade(1);
+      setComprador('');
+      // Redireciona para pagamento PIX após compra
+      navigate("/pagamento/pix");
     } catch (err) {
       setMensagem(`Erro ao comprar: ${err.message}`);
     } finally {
@@ -102,9 +86,9 @@ export default function EventoDetail() {
       <Link to="/" className="back">← Voltar</Link>
       <h2>{evento.nome}</h2>
       <div className="detail-grid">
-        <img 
-          src={evento.imagem || 'https://via.placeholder.com/600x320?text=Sem+imagem'} 
-          alt={evento.nome} 
+        <img
+          src={evento.imagem || 'https://via.placeholder.com/600x320?text=Sem+imagem'}
+          alt={evento.nome}
           className="detail-img"
         />
         <div className="detail-info">
@@ -112,36 +96,42 @@ export default function EventoDetail() {
           <p>{evento.descricao}</p>
           <p><strong>Ingressos disponíveis:</strong> {evento.ingressos_disponiveis}</p>
 
-          <form onSubmit={handleComprar} className="purchase-form">
-            <h3>Comprar ingresso</h3>
-            <label>
-              Quantidade
-              <input 
-                type="number" 
-                min="1" 
-                max={evento.ingressos_disponiveis} 
-                value={quantidade} 
-                onChange={e => setQuantidade(Number(e.target.value))} 
-              />
-            </label>
-            <label>
-              Nome do comprador (opcional)
-              <input 
-                type="text" 
-                value={comprador} 
-                onChange={e => setComprador(e.target.value)} 
-                placeholder="Nome para o ingresso" 
-              />
-            </label>
-            <button 
-              type="submit" 
-              className="btn" 
-              disabled={comprando || evento.ingressos_disponiveis === 0}
-            >
-              {comprando ? 'Processando...' : 'Comprar'}
-            </button>
-            {mensagem && <p className="message">{mensagem}</p>}
-          </form>
+          {estaLogado ? (
+            <form onSubmit={handleComprar} className="purchase-form">
+              <h3>Comprar ingresso</h3>
+              <label>
+                Quantidade
+                <input
+                  type="number"
+                  min="1"
+                  max={evento.ingressos_disponiveis}
+                  value={quantidade}
+                  onChange={e => setQuantidade(Number(e.target.value))}
+                  disabled={comprando}
+                />
+              </label>
+              <label>
+                Nome do comprador (opcional)
+                <input
+                  type="text"
+                  value={comprador}
+                  onChange={e => setComprador(e.target.value)}
+                  placeholder="Nome para o ingresso"
+                  disabled={comprando}
+                />
+              </label>
+              <button
+                type="submit"
+                className="btn"
+                disabled={comprando || evento.ingressos_disponiveis === 0}
+              >
+                {comprando ? 'Processando...' : 'Comprar'}
+              </button>
+              {mensagem && <p className={mensagem.includes('Erro') ? 'message erro' : 'message sucesso'}>{mensagem}</p>}
+            </form>
+          ) : (
+            <p>Você precisa estar logado para comprar ingressos.</p>
+          )}
         </div>
       </div>
     </div>

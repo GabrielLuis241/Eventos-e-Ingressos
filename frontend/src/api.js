@@ -1,55 +1,45 @@
-
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
-export async function apiGet(path) {
-  try {
-    const res = await fetch(`${API_BASE}${path}`);
-    if (!res.ok) {
-      throw new Error(`API GET ${path} falhou (${res.status})`);
-    }
-    return res.json();
-  } catch (error) {
-    console.error('Erro em apiGet:', error);
-    throw error;
+async function handleResponse(res, path, method) {
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API ${method} ${path} falhou (${res.status}): ${text}`);
   }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+export async function apiGet(path) {
+  const res = await fetch(`${API_BASE}${path}`);
+  return handleResponse(res, path, 'GET');
 }
 
 export async function apiPost(path, body) {
-  try {
-    const res = await fetch(`${API_BASE}${path}`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json' 
-      },
-      body: JSON.stringify(body)
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`API POST ${path} falhou (${res.status}): ${text}`);
-    }
-
-    return res.json();
-  } catch (error) {
-    console.error('Erro em apiPost:', error);
-    throw error;
-  }
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return handleResponse(res, path, 'POST');
 }
 
-
-
-export async function loginUsuario(email, senha) {
-  return apiPost('/login/', { email, senha });
+export async function apiPut(path, body) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return handleResponse(res, path, 'PUT');
 }
 
-export async function cadastrarUsuario(nome, email, senha) {
-  return apiPost('/usuarios/', { nome, email, senha, tipo: 'usuario' });
+export async function apiDelete(path) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'DELETE',
+  });
+  return handleResponse(res, path, 'DELETE');
 }
 
-export async function cadastrarAdm(nome, email, senha, chaveAdm) {
-  return apiPost('/usuarios/', { nome, email, senha, tipo: 'admin', chaveAdm });
-}
-
+// Eventos
 export async function listarEventos() {
   return apiGet('/eventos/');
 }
@@ -58,34 +48,53 @@ export async function buscarEventoPorId(id) {
   return apiGet(`/eventos/${id}/`);
 }
 
-export async function comprarIngresso(evento_id, nome, quantidade, metodo_pagamento) {
-  return apiPost('/comprar/', { evento_id, nome, quantidade, metodo_pagamento });
+export async function criarEvento(dados) {
+  return apiPost('/eventos/', dados);
 }
 
-export async function pagarComCartao(compraId, numero, validade, cvv) {
-  return apiPost('/pagamento/cartao/', { compraId, numero, validade, cvv });
+export async function atualizarEvento(id, dados) {
+  return apiPut(`/eventos/${id}/`, dados);
 }
 
-export async function gerarPagamentoPix(compraId) {
-  return apiPost('/pagamento/pix/', { compraId });
+export async function removerEvento(id) {
+  return apiDelete(`/eventos/${id}/`);
 }
 
-export async function confirmarCompra(compraId) {
-  return apiGet(`/compra/${compraId}/confirmacao/`);
+// Ingressos (compra direta)
+export async function comprarIngresso(evento_id, comprador_nome, quantidade) {
+  return apiPost('/ingressos/', {
+    evento: evento_id,
+    comprador_nome,
+    quantidade,
+  });
+}
+
+// Pagamento Pix
+export async function iniciarPix(username, evento_id, quantidade) {
+  return apiPost('/pagamentos/pix/', {
+    username,
+    evento_id,
+    quantidade,
+  });
+}
+
+export async function confirmarPix(pagamento_id) {
+  return apiPost('/pagamentos/pix/confirmar/', { pagamento_id });
 }
 
 const api = {
   apiGet,
   apiPost,
-  loginUsuario,
-  cadastrarUsuario,
-  cadastrarAdm,
+  apiPut,
+  apiDelete,
   listarEventos,
   buscarEventoPorId,
+  criarEvento,
+  atualizarEvento,
+  removerEvento,
   comprarIngresso,
-  pagarComCartao,
-  gerarPagamentoPix,
-  confirmarCompra,
+  iniciarPix,
+  confirmarPix,
 };
 
 export default api;

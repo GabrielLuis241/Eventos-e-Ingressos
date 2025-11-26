@@ -1,91 +1,122 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import './EventoDetail.css'; 
-import { apiPost } from '../api';
+import React, { useEffect, useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { apiGet } from '../api';
+import './EventoDetail.css';
 
 export default function EventoDetail() {
   const { id } = useParams();
+  const [evento, setEvento] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState(null);
 
-  const [nome, setNome] = useState('');
   const [quantidade, setQuantidade] = useState(1);
-  const [mensagem, setMensagem] = useState('');
-  const [mostrarCompra, setMostrarCompra] = useState(false);
+  const [comprador, setComprador] = useState('');
+  const [comprando, setComprando] = useState(false);
+  const [mensagem, setMensagem] = useState(null);
 
-  async function handleCompra() {
-    try {
-      await apiPost('/comprar/', {
-        evento_id: id,
-        nome,
-        quantidade: Number(quantidade),
+  const usuarioLogado = localStorage.getItem("usuarioLogado");
+  const estaLogado = !!usuarioLogado;
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let mounted = true;
+    apiGet(`/eventos/${id}/`)
+      .then(data => {
+        if (mounted) {
+          setEvento(data);
+          setLoading(false);
+        }
+      })
+      .catch(e => {
+        if (mounted) {
+          setErro('Erro ao carregar evento');
+          setLoading(false);
+        }
       });
+    return () => { mounted = false; };
+  }, [id]);
 
-      setMensagem('✅ Compra realizada com sucesso!');
-      setNome('');
-      setQuantidade(1);
-    } catch (error) {
-      console.error('Erro ao comprar ingresso:', error);
-      setMensagem('❌ Erro ao realizar compra. Tente novamente.');
+  if (loading) return <div>Carregando evento...</div>;
+  if (erro) return <div className="error">Erro: {erro}</div>;
+  if (!evento) return <div>Evento não encontrado.</div>;
+
+  const handleComprar = (e) => {
+    e.preventDefault();
+    setMensagem(null);
+
+    if (quantidade < 1) {
+      setMensagem('Quantidade mínima é 1');
+      return;
     }
-  }
+    if (quantidade > evento.ingressos_disponiveis) {
+      setMensagem('Quantidade maior que ingressos disponíveis');
+      return;
+    }
+
+    setMensagem('Compra simulada! (sem integração com API)');
+    setEvento(prev => ({
+      ...prev,
+      ingressos_disponiveis: prev.ingressos_disponiveis - quantidade
+    }));
+    setQuantidade(1);
+    setComprador('');
+    navigate("/pagamento/pix"); // Redireciona para pagamento pix
+  };
 
   return (
     <div className="evento-detail">
-     <Link to="/" className="btn-voltar">
-        ← Voltar
-     </Link>
-  
+      <Link to="/" className="back">← Voltar</Link>
+      <h2>{evento.nome}</h2>
       <div className="detail-grid">
         <img
-          src={`https://source.unsplash.com/800x500/?event,${id}`}
-          alt="Evento"
+          src={evento.imagem || 'https://via.placeholder.com/600x320?text=Sem+imagem'}
+          alt={evento.nome}
           className="detail-img"
         />
-
         <div className="detail-info">
-          <h2>Detalhes do Evento #{id}</h2>
-          <p>
-            Este é um evento incrível repleto de experiências únicas e momentos inesquecíveis.
-            Garanta seu ingresso e participe!
-          </p>
+          <p className="meta">{evento.data} • {evento.horario} — {evento.local}</p>
+          <p>{evento.descricao}</p>
+          <p><strong>Ingressos disponíveis:</strong> {evento.ingressos_disponiveis}</p>
 
-          <button
-            onClick={() => setMostrarCompra(!mostrarCompra)}
-            className="btn">
-            {mostrarCompra ? 'Fechar Compra' : 'Comprar Ingresso'}
-          </button>
-
-        </div>
-      </div>
-
-      {mostrarCompra && (
-        <div id="comprar" className="form-compra">
-          <h3>Comprar ingresso</h3>
-
-          <label>Nome do comprador:</label>
-          <input
-            type="text"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            placeholder="Digite seu nome"
-          />
-
-          <label>Quantidade:</label>
-          <input
-            type="number"
-            min="1"
-            value={quantidade}
-            onChange={(e) => setQuantidade(e.target.value)}
-          />
-
-          <button onClick={handleCompra} className="btn">Confirmar Compra</button>
-
-          {mensagem && (
-            <p className={`mensagem ${mensagem.includes('Erro') ? 'erro' : 'sucesso'}`}>
-              {mensagem}
-            </p>
+          {estaLogado ? (
+            <form onSubmit={handleComprar} className="purchase-form">
+              <h3>Comprar ingresso</h3>
+              <label>
+                Quantidade
+                <input
+                  type="number"
+                  min="1"
+                  max={evento.ingressos_disponiveis}
+                  value={quantidade}
+                  onChange={e => setQuantidade(Number(e.target.value))}
+                  disabled={comprando}
+                />
+              </label>
+              <label>
+                Nome do comprador (opcional)
+                <input
+                  type="text"
+                  value={comprador}
+                  onChange={e => setComprador(e.target.value)}
+                  placeholder="Nome para o ingresso"
+                  disabled={comprando}
+                />
+              </label>
+              <button
+                type="submit"
+                className="btn"
+                disabled={comprando || evento.ingressos_disponiveis === 0}
+              >
+                {comprando ? 'Processando...' : 'Comprar'}
+              </button>
+              {mensagem && <p className={mensagem.includes('Erro') ? 'message erro' : 'message sucesso'}>{mensagem}</p>}
+            </form>
+          ) : (
+            <p>Você precisa estar logado para comprar ingressos.</p>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

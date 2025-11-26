@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { apiGet, apiPost } from "../api";
+import { buscarEventoPorId, atualizarEvento } from "../api";
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function EditarEvento() {
@@ -9,7 +9,7 @@ export default function EditarEvento() {
   const [erro, setErro] = useState("");
 
   useEffect(() => {
-    apiGet(`/eventos/${id}/`)
+    buscarEventoPorId(id)
       .then((res) => setForm(res))
       .catch(() => alert("Erro ao carregar evento."));
   }, [id]);
@@ -21,13 +21,22 @@ export default function EditarEvento() {
   async function salvar(e) {
     e.preventDefault();
 
-    if (!form.titulo || !form.data) {
+    if (!form.nome || !form.data) {
       setErro("Campos obrigatórios precisam ser preenchidos.");
       return;
     }
 
+    const payload = {
+      nome: form.nome,
+      descricao: form.descricao,
+      data: form.data,
+      horario: form.horario,
+      local: form.local,
+      ingressos_disponiveis: Number(form.ingressos_disponiveis || 0),
+    };
+
     try {
-      await apiPost(`/eventos/editar/${id}/`, form);
+      await atualizarEvento(id, payload);
       alert("Evento atualizado!");
       navigate("/admin/eventos");
     } catch {
@@ -42,32 +51,42 @@ export default function EditarEvento() {
       <h2>Editar Evento</h2>
 
       <form onSubmit={salvar} className="form-evento">
-        <label>Título *</label>
-        <input name="titulo" value={form.titulo} onChange={atualizar} />
-
-        <label>Categoria</label>
-        <input name="categoria" value={form.categoria} onChange={atualizar} />
+        <label>Nome *</label>
+        <input name="nome" value={form.nome || ""} onChange={atualizar} />
 
         <label>Data *</label>
-        <input type="date" name="data" value={form.data} onChange={atualizar} />
+        <input
+          type="date"
+          name="data"
+          value={form.data || ""}
+          onChange={atualizar}
+        />
 
         <label>Hora *</label>
-        <input type="time" name="hora" value={form.hora} onChange={atualizar} />
+        <input
+          type="time"
+          name="horario"
+          value={form.horario || ""}
+          onChange={atualizar}
+        />
 
         <label>Local *</label>
-        <input name="local" value={form.local} onChange={atualizar} />
-
-        <label>Cidade *</label>
-        <input name="cidade" value={form.cidade} onChange={atualizar} />
-
-        <label>Preço *</label>
-        <input name="preco" value={form.preco} onChange={atualizar} />
+        <input name="local" value={form.local || ""} onChange={atualizar} />
 
         <label>Ingressos *</label>
-        <input name="ingressos" value={form.ingressos} onChange={atualizar} />
+        <input
+          type="number"
+          name="ingressos_disponiveis"
+          value={form.ingressos_disponiveis || 0}
+          onChange={atualizar}
+        />
 
         <label>Descrição</label>
-        <textarea name="descricao" value={form.descricao} onChange={atualizar} />
+        <textarea
+          name="descricao"
+          value={form.descricao || ""}
+          onChange={atualizar}
+        />
 
         <div className="botoes">
           <button type="submit" className="btn-roxo">
@@ -92,7 +111,7 @@ export default function EditarEvento() {
           box-shadow: 0 4px 12px rgba(106, 13, 173, 0.2);
         }
         h2 {
-          color: #6A0DAD;
+          color: #6a0dad;
           text-align: center;
           margin-bottom: 20px;
         }
@@ -113,7 +132,7 @@ export default function EditarEvento() {
           justify-content: space-between;
         }
         .btn-roxo {
-          background: #6A0DAD;
+          background: #6a0dad;
           color: white;
           padding: 12px 20px;
           border: none;
@@ -129,7 +148,7 @@ export default function EditarEvento() {
           cursor: pointer;
         }
         .erro {
-          color: red;
+          color: red; 
           margin-top: 10px;
         }
       `}</style>

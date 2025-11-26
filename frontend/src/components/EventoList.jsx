@@ -24,7 +24,7 @@ export default function EventoList() {
       },
       {
         id: 2,
-        nome: 'Festival de Música',
+        nome: 'Festival de Música 2',
         descricao: 'Festival com várias bandas',
         data: '2025-12-01',
         horario: '18:00',

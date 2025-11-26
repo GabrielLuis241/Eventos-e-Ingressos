@@ -64,3 +64,33 @@ input {
 .mensagem.erro {
   color: #c0392b;
 }
+
+.tipo-login {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.tipo-login button {
+  background: #eee;
+  border: 1px solid #ccc;
+  padding: 10px 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--roxo-primario);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.tipo-login button:hover {
+  background: var(--roxo-primario);
+  color: #fff;
+}
+
+.tipo-login button.ativo {
+  background: var(--roxo-primario);
+  color: white;
+  border-color: var(--roxo-primario);
+}
+
