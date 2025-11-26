@@ -1,9 +1,16 @@
-
 from django.urls import path
-from .views import eventos_list_create, evento_detail, meus_ingressos
+from . import views
 
 urlpatterns = [
-    path('', eventos_list_create, name='eventos_list_create'),  
-    path('<int:pk>/', evento_detail, name='evento_detail'),     
-    path('meus/', meus_ingressos, name='meus_ingressos'),      
+    # US01 - listar eventos
+    path('', views.EventoListView.as_view(), name='eventos-listar'),
+
+    # US02 - detalhes de um evento
+    path('<int:pk>/', views.EventoDetailView.as_view(), name='eventos-detalhes'),
+
+    # US04 - ingresso digital
+    path('ingressos/<int:ingresso_id>/digital/', views.IngressoDigitalView.as_view(), name='ingresso-digital'),
+
+    # US05 - criar evento
+    path('criar/', views.EventoCreateView.as_view(), name='eventos-criar'),
 ]
