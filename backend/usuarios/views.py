@@ -23,21 +23,6 @@ def registrar(request):
 
     return Response({'id': user.id, 'username': user.username, 'email': user.email, 'tipo': tipo}, status=201)
 
-@api_view(['POST'])
-def login_view(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
-
-    user = authenticate(username=username, password=password)
-    if user is None:
-        return Response({'detail': 'Credenciais inválidas.'}, status=400)
-
-    login(request, user)
-
-    token_fake = 'token_' + username
-    tipo = getattr(getattr(user, 'perfil', None), 'tipo', 'cliente')
-    return Response({'message': 'Login realizado!', 'token': token_fake, 'username': username, 'tipo': tipo})
-
 @api_view(['GET'])
 def perfil(request):
     user = request.user if request.user.is_authenticated else None
