@@ -7,7 +7,7 @@ def home(request):
     return JsonResponse({"status": "online", "message": "API Eventos rodando! 🚀"})
 
 urlpatterns = [
-    path('', home),  # 👈 rota raiz
+    path('', home), 
     
     path('admin/', admin.site.urls),
     
