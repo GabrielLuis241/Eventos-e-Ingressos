@@ -11,14 +11,14 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--cinza-claro);
+  background: #f5f5fb;
   font-family: 'Inter', Arial, sans-serif;
 }
 
+/* nada de padding/margem aqui */
 .app-main {
   flex: 1;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
+  margin: 0;
+  padding: 0;
 }

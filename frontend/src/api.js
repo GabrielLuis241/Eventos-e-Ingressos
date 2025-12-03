@@ -1,4 +1,5 @@
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+// src/api.js
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8000/api";
 
 async function handleResponse(res, path, method) {
   if (!res.ok) {
@@ -9,39 +10,58 @@ async function handleResponse(res, path, method) {
   return res.json();
 }
 
+// Helpers base com JWT (se houver token salvo)
 export async function apiGet(path) {
-  const res = await fetch(`${API_BASE}${path}`);
-  return handleResponse(res, path, 'GET');
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "GET",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  return handleResponse(res, path, "GET");
 }
 
 export async function apiPost(path, body) {
+  const token = localStorage.getItem("accessToken");
   const res = await fetch(`${API_BASE}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify(body),
   });
-  return handleResponse(res, path, 'POST');
+  return handleResponse(res, path, "POST");
 }
 
 export async function apiPut(path, body) {
+  const token = localStorage.getItem("accessToken");
   const res = await fetch(`${API_BASE}${path}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify(body),
   });
-  return handleResponse(res, path, 'PUT');
+  return handleResponse(res, path, "PUT");
 }
 
 export async function apiDelete(path) {
+  const token = localStorage.getItem("accessToken");
   const res = await fetch(`${API_BASE}${path}`, {
-    method: 'DELETE',
+    method: "DELETE",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
   });
-  return handleResponse(res, path, 'DELETE');
+  return handleResponse(res, path, "DELETE");
 }
 
 // Eventos
 export async function listarEventos() {
-  return apiGet('/eventos/');
+  return apiGet("/eventos/");
 }
 
 export async function buscarEventoPorId(id) {
@@ -49,7 +69,8 @@ export async function buscarEventoPorId(id) {
 }
 
 export async function criarEvento(dados) {
-  return apiPost('/eventos/', dados);
+  // conforme documentação: POST /api/eventos/criar/
+  return apiPost("/eventos/criar/", dados);
 }
 
 export async function atualizarEvento(id, dados) {
@@ -62,7 +83,7 @@ export async function removerEvento(id) {
 
 // Ingressos (compra direta)
 export async function comprarIngresso(evento_id, comprador_nome, quantidade) {
-  return apiPost('/ingressos/', {
+  return apiPost("/ingressos/", {
     evento: evento_id,
     comprador_nome,
     quantidade,
@@ -71,7 +92,7 @@ export async function comprarIngresso(evento_id, comprador_nome, quantidade) {
 
 // Pagamento Pix
 export async function iniciarPix(username, evento_id, quantidade) {
-  return apiPost('/pagamentos/pix/', {
+  return apiPost("/pagamentos/pix/", {
     username,
     evento_id,
     quantidade,
@@ -79,7 +100,7 @@ export async function iniciarPix(username, evento_id, quantidade) {
 }
 
 export async function confirmarPix(pagamento_id) {
-  return apiPost('/pagamentos/pix/confirmar/', { pagamento_id });
+  return apiPost("/pagamentos/pix/confirmar/", { pagamento_id });
 }
 
 const api = {

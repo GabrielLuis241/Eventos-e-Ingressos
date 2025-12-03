@@ -1,121 +1,178 @@
-.gerenciar-container {
-  max-width: 1000px;
-  margin: 30px auto;
-  padding: 20px;
+.gerenciar-page {
+  background: #f5f5fb;
+  min-height: 100vh;
+  padding: 32px 5vw 60px;
 }
 
 .titulo {
   text-align: center;
-  color: #6A0DAD;
-  margin-bottom: 20px;
+  color: #6a0dad;
+  margin-bottom: 16px;
 }
 
-.btn-roxo {
-  background: #6A0DAD;
-  color: white;
-  padding: 12px 20px;
-  border-radius: 10px;
+.btn-roxo-criar {
+  display: block;
+  margin: 0 auto 24px;
+  padding: 10px 22px;
+  border-radius: 999px;
   border: none;
+  background: #6a0dad;
+  color: #fff;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 16px;
-  margin-bottom: 20px;
 }
 
-.btn-roxo:hover {
-  background: #580b98;
+/* GRID ADMIN */
+
+.eventos-section-admin {
+  max-width: 1150px;
+  margin: 0 auto;
 }
 
-.lista-eventos {
+.eventos-grid-admin {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 22px;
+}
+
+.evento-card-admin {
+  background: #5c1bb2;
+  color: #fff;
+  border-radius: 18px;
+  padding: 16px 18px 18px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  flex-direction: column;
 }
 
-.card-evento {
-  background: white;
-  border-radius: 12px;
-  padding: 10px;
-  width: 230px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-  position: relative;
+.evento-header-admin {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
 }
 
-.card-evento img {
-  width: 100%;
-  border-radius: 8px;
+.evento-header-admin h3 {
+  margin: 0;
+  font-size: 1.1rem;
 }
 
-.card-evento .btn-excluir {
-  position: absolute;
-  top: 8px;
-  right: 8px;
+.btn-excluir-admin {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
   border: none;
-  background: red;
-  color: white;
-  border-radius: 8px;
-  padding: 5px;
+  background: #ff1744;
+  color: #fff;
+  font-size: 1rem;
   cursor: pointer;
 }
+
+.meta-admin,
+.meta-local-admin {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.meta-local-admin {
+  margin-bottom: 12px;
+}
+
+.acoes-admin {
+  margin-top: auto;
+}
+
+.btn-roxo-admin {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: #fff;
+  color: #5c1bb2;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+/* MODAL CRIAR EVENTO (reaproveitando seu estilo base) */
 
 .modal-bg {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  z-index: 50;
 }
 
 .modal {
-  background: white;
-  width: 600px;
-  padding: 20px;
-  border-radius: 14px;
-  max-height: 90vh;
-  overflow-y: auto;
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px 22px 24px;
+  width: 100%;
+  max-width: 640px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  position: relative;
 }
 
 .fechar {
-  float: right;
-  background: none;
+  position: absolute;
+  top: 10px;
+  right: 12px;
   border: none;
-  font-size: 22px;
+  background: transparent;
+  font-size: 1.2rem;
   cursor: pointer;
 }
 
-.row {
+.form-modal .row {
   display: flex;
-  gap: 15px;
+  gap: 16px;
   margin-bottom: 10px;
 }
 
-.col {
+.form-modal .col {
   flex: 1;
 }
 
-input, textarea {
+.form-modal label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.form-modal input,
+.form-modal textarea {
   width: 100%;
-  padding: 8px;
+  padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  margin-top: 5px;
+  font-size: 0.95rem;
 }
+
+.form-modal textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
 .botoes-modal {
   display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
 }
 
 .btn-cancelar {
-  background: #b30000;
-  color: white;
-  padding: 12px 20px;
   border: none;
-  border-radius: 10px;
+  background: #e0e0e0;
+  color: #444;
+  padding: 8px 16px;
+  border-radius: 999px;
   cursor: pointer;
-  font-size: 16px;
 }
 
-.btn-cancelar:hover {
-  background: #8c0000;
+@media (max-width: 768px) {
+  .form-modal .row {
+    flex-direction: column;
+  }
 }

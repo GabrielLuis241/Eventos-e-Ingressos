@@ -5,7 +5,7 @@ import Login from './pages/Login';
 import CadastroUsuario from './pages/CadastroUsuario';
 import CadastroAdm from './pages/CadastroAdm';
 
-import Header from './components/Header';
+//import Header from './components/Header';
 import Footer from './components/Footer';
 
 import GerenciarEventos from './pages/GerenciarEventos';
@@ -24,8 +24,6 @@ import './App.css';
 function App() {
   return (
     <div className="app-container">
-      <Header />
-
       <main className="app-main">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -43,7 +41,7 @@ function App() {
 
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro/usuario" element={<CadastroUsuario />} />
-          <Route path="/cadastro/adm" element={<CadastroAdm />} />
+          <Route path="/cadastro/admin" element={<CadastroAdm />} />
         </Routes>
       </main>
 
