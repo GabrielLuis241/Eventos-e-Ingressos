@@ -1,0 +1,306 @@
+/* src/pages/Relatorios.css */
+
+.relatorios-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+}
+
+.relatorios-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--text-light);
+    padding: 2rem 0;
+    box-shadow: var(--shadow-lg);
+}
+
+.header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.header-left h1 {
+    font-size: 2rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.subtitle {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+    font-size: 1rem;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.user-name {
+    font-weight: 500;
+    padding-right: 1rem;
+    border-right: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.relatorios-header .btn {
+    color: var(--text-light);
+    border-color: var(--text-light);
+}
+
+.relatorios-header .btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.relatorios-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Metrics Section */
+.metrics-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary);
+}
+
+.metric-card.primary::before {
+    background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+}
+
+.metric-card.secondary::before {
+    background: linear-gradient(180deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+}
+
+.metric-card.accent::before {
+    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.metric-icon {
+    font-size: 3rem;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gray-100);
+    border-radius: var(--radius-lg);
+}
+
+.metric-content {
+    flex: 1;
+}
+
+.metric-content h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 0.5rem 0;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1;
+}
+
+/* Table Section */
+.table-section {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 2rem;
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.data-table thead {
+    background: var(--gray-50);
+}
+
+.data-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--gray-300);
+}
+
+.data-table tbody tr {
+    border-bottom: 1px solid var(--gray-200);
+    transition: var(--transition-fast);
+}
+
+.data-table tbody tr:hover {
+    background: var(--gray-50);
+}
+
+.data-table td {
+    padding: 1rem;
+    color: var(--text-primary);
+}
+
+.data-table .event-name,
+.data-table .client-name {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.data-table .email {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.data-table .value {
+    font-weight: 600;
+    color: var(--success);
+}
+
+.data-table .text-center {
+    text-align: center;
+}
+
+.data-table tfoot {
+    background: var(--gray-100);
+    font-weight: 700;
+}
+
+.data-table tfoot td {
+    padding: 1.25rem 1rem;
+    border-top: 2px solid var(--gray-300);
+}
+
+.total-row {
+    background: var(--gray-100);
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-right {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .user-name {
+        border-right: none;
+        padding-right: 0;
+        width: 100%;
+    }
+
+    .relatorios-container {
+        padding: 1rem;
+    }
+
+    .metrics-section {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-card {
+        padding: 1.5rem;
+    }
+
+    .metric-icon {
+        font-size: 2.5rem;
+        width: 60px;
+        height: 60px;
+    }
+
+    .metric-value {
+        font-size: 1.5rem;
+    }
+
+    .table-section {
+        padding: 1rem;
+    }
+
+    .data-table {
+        font-size: 0.875rem;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 0.75rem 0.5rem;
+    }
+}

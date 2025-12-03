@@ -139,6 +139,20 @@ export default function Home() {
             {usuario ? (
               <>
                 <span className="login-text">Olá, {usuario.username}</span>
+                {usuario.tipo === "organizador" ? (
+                  <>
+                    <Link to="/admin/eventos" className="btn-link">
+                      Gerenciar Eventos
+                    </Link>
+                    <Link to="/relatorios" className="btn-link">
+                      Relatórios
+                    </Link>
+                  </>
+                ) : (
+                  <Link to="/perfil" className="btn-link">
+                    Meu Perfil
+                  </Link>
+                )}
                 <button className="btn-sair" onClick={handleLogout}>
                   sair
                 </button>
@@ -201,9 +215,8 @@ export default function Home() {
             <button
               key={cat}
               type="button"
-              className={`categoria-card ${
-                categoriaAtiva === cat ? "ativa" : ""
-              }`}
+              className={`categoria-card ${categoriaAtiva === cat ? "ativa" : ""
+                }`}
               onClick={() => setCategoriaAtiva(cat)}
             >
               <div className="categoria-avatar">

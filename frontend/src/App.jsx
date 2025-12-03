@@ -17,7 +17,9 @@ import PagamentoCartao from './pages/PagamentoCartao';
 import PagamentoPix from './pages/PagamentoPix';
 import ConfirmacaoCompra from './pages/ConfirmacaoCompra';
 
-import EditarEvento from './pages/EditarEvento';   
+import EditarEvento from './pages/EditarEvento';
+import Relatorios from './pages/Relatorios';
+import Perfil from './pages/Perfil';
 
 import './App.css';
 
@@ -41,6 +43,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro/usuario" element={<CadastroUsuario />} />
           <Route path="/cadastro/admin" element={<CadastroAdm />} />
+
+          <Route path="/relatorios" element={<Relatorios />} />
+          <Route path="/perfil" element={<Perfil />} />
         </Routes>
       </main>
 

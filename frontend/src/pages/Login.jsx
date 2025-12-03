@@ -43,7 +43,7 @@ export default function Login() {
 
       // 5. Redirecionar conforme tipo
       if (perfil.tipo === "organizador") {
-        navigate("/admin/eventos");
+        navigate("/");
       } else {
         navigate("/");
       }
