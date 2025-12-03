@@ -16,6 +16,7 @@ export default function GerenciarEventos() {
     ingressos_disponiveis: 0,
     imagem: "",
   });
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -92,13 +93,28 @@ export default function GerenciarEventos() {
             <div key={evento.id} className="evento-card-admin">
               <div className="evento-header-admin">
                 <h3>{evento.nome}</h3>
-                <button
-                  className="btn-excluir-admin"
-                  onClick={() => handleExcluirEvento(evento.id)}
-                  title="Excluir evento"
-                >
-                  🗑
-                </button>
+
+                <div className="acoes-header-admin">
+                  {/* BOTÃO EDITAR EVENTO */}
+                  <button
+                    className="btn-editar-admin"
+                    onClick={() =>
+                      navigate(`/admin/eventos/${evento.id}/editar`)
+                    }
+                    title="Editar evento"
+                  >
+                    ✏
+                  </button>
+
+                  {/* BOTÃO EXCLUIR EVENTO */}
+                  <button
+                    className="btn-excluir-admin"
+                    onClick={() => handleExcluirEvento(evento.id)}
+                    title="Excluir evento"
+                  >
+                    🗑
+                  </button>
+                </div>
               </div>
 
               <p className="meta-admin">
@@ -119,11 +135,14 @@ export default function GerenciarEventos() {
         </div>
       </section>
 
-      {/* MODAL DE CRIAR EVENTO (mesma lógica que você já usava) */}
+      {/* MODAL DE CRIAR EVENTO */}
       {mostrarModal && (
         <div className="modal-bg">
           <div className="modal">
-            <button className="fechar" onClick={() => setMostrarModal(false)}>
+            <button
+              className="fechar"
+              onClick={() => setMostrarModal(false)}
+            >
               ✖
             </button>
 

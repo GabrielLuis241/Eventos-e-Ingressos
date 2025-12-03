@@ -30,8 +30,7 @@ function App() {
 
           <Route path="/evento/:id" element={<EventoDetail />} />
           <Route path="/admin/eventos" element={<GerenciarEventos />} />
-          <Route path="/admin/eventos/editar/:id" element={<EditarEvento />} />
-
+          <Route path="/admin/eventos/:id/editar" element={<EditarEvento />} />
           <Route path="/evento/:id/compra" element={<CompraIngresso />} />
 
           <Route path="/pagamento/cartao" element={<PagamentoCartao />} />
