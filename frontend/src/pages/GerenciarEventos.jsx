@@ -15,6 +15,7 @@ export default function GerenciarEventos() {
     local: "",
     ingressos_disponiveis: 0,
     imagem: "",
+    categoria: "show",
   });
 
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ export default function GerenciarEventos() {
       local: form.local,
       ingressos_disponiveis: Number(form.ingressos_disponiveis || 0),
       imagem: form.imagem,
+      categoria: form.categoria,
     };
 
     try {
@@ -55,6 +57,7 @@ export default function GerenciarEventos() {
         local: "",
         ingressos_disponiveis: 0,
         imagem: "",
+        categoria: "show",
       });
     } catch (err) {
       alert("Erro ao criar evento.");
@@ -225,6 +228,19 @@ export default function GerenciarEventos() {
                 value={form.imagem}
                 onChange={atualizarForm}
               />
+
+              <label>Categoria *</label>
+              <select
+                name="categoria"
+                value={form.categoria}
+                onChange={atualizarForm}
+                required
+              >
+                <option value="show">🎵 Show</option>
+                <option value="teatro">🎭 Teatro</option>
+                <option value="palestra">🎤 Palestra</option>
+                <option value="outros">⭐ Outros</option>
+              </select>
 
               <div className="botoes-modal">
                 <button type="submit" className="btn-roxo-criar">

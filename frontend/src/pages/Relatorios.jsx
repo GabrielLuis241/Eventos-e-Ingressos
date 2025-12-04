@@ -103,8 +103,20 @@ export default function Relatorios() {
       navigate("/login");
     }
 
-    // TODO: Buscar dados reais do backend
-    // fetchRelatorios();
+    // Simulação de auto-update (polling)
+    const intervalId = setInterval(() => {
+      // Aqui você faria o fetch real: fetchRelatorios();
+
+      // Simulando atualização dos dados para demonstrar o recurso visualmente
+      setRelatorios(prev => ({
+        ...prev,
+        totalVendas: prev.totalVendas + (Math.random() > 0.5 ? 150 : 0),
+        totalIngressos: prev.totalIngressos + (Math.random() > 0.5 ? 1 : 0)
+      }));
+    }, 5000); // Atualiza a cada 5 segundos para demonstração (na vida real seria 30s ou mais)
+
+    // Cleanup do intervalo ao desmontar
+    return () => clearInterval(intervalId);
   }, [navigate]);
 
   // Função preparada para integração com backend
@@ -134,6 +146,7 @@ export default function Relatorios() {
       <header className="relatorios-header">
         <div className="header-content">
           <div className="header-left">
+            <Link to="/" className="back-button">← Voltar</Link>
             <h1>📊 Relatórios</h1>
             <p className="subtitle">Painel de controle e análises</p>
           </div>

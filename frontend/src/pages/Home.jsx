@@ -8,8 +8,8 @@ export default function Home() {
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categoriaAtiva, setCategoriaAtiva] = useState("todos");
-  const [indexDestaque, setIndexDestaque] = useState(0);
   const [usuario, setUsuario] = useState(null);
+  const [carouselIndex, setCarouselIndex] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -88,19 +88,28 @@ export default function Home() {
     };
   }, []);
 
-  const categorias = useMemo(() => {
-    const base = ["todos"];
-    eventos.forEach((e) => {
-      if (e.categoria && !base.includes(e.categoria)) base.push(e.categoria);
-    });
-    return base;
-  }, [eventos]);
+  // Auto-rotate carousel
+  useEffect(() => {
+    if (eventos.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCarouselIndex((prev) => (prev + 1) % Math.min(eventos.length, 5));
+    }, 4000); // Muda a cada 4 segundos
+
+    return () => clearInterval(interval);
+  }, [eventos.length]);
+
+  // Categorias fixas
+  const categorias = ["todos", "show", "teatro", "palestra", "festa", "esporte", "outros"];
 
   const getCategoriaEmoji = (cat) => {
+    if (cat === "todos") return "⭐";
     if (cat === "show") return "🎵";
     if (cat === "teatro") return "🎭";
     if (cat === "palestra") return "🎤";
-    return "⭐";
+    if (cat === "festa") return "🎉";
+    if (cat === "esporte") return "⚽";
+    return "📅";
   };
 
   const eventosFiltrados = useMemo(() => {
@@ -108,8 +117,7 @@ export default function Home() {
     return eventos.filter((e) => e.categoria === categoriaAtiva);
   }, [eventos, categoriaAtiva]);
 
-  const destaques = eventos.slice(0, 3);
-  const destaqueAtual = destaques[indexDestaque] || null;
+  const destaques = eventos.slice(0, 5);
 
   function handleLogout() {
     localStorage.removeItem("accessToken");
@@ -119,149 +127,130 @@ export default function Home() {
     navigate("/");
   }
 
-  if (loading) return <p>Carregando eventos...</p>;
+  if (loading) return <div className="loading-screen">Carregando...</div>;
 
   return (
     <div className="home-page">
-      {/* TOPO ROXO FULL-WIDTH COM CONTAINER CENTRALIZADO */}
-      <section className="top-header">
-        <div className="top-header-inner">
-          <div className="top-left">
-            <h1 className="logo-main">EVENTOS+</h1>
-            <p className="top-subtitle">
-              Encontre e compre
-              <br />
-              ingressos para eventos
-            </p>
+      {/* HEADER ROXO */}
+      <header className="home-header">
+        <div className="header-content">
+          <div className="logo-section">
+            <h1>EVENTOS+</h1>
+            <p>Encontre e compre<br />ingressos para eventos</p>
+
+            <div className="search-bar">
+              <span className="search-icon">🔍</span>
+              <input type="text" placeholder="Buscar eventos..." />
+            </div>
           </div>
 
-          <div className="top-right">
+          <div className="header-actions">
             {usuario ? (
               <>
-                <span className="login-text">Olá, {usuario.username}</span>
-                {usuario.tipo === "organizador" ? (
-                  <>
-                    <Link to="/admin/eventos" className="btn-link">
-                      Gerenciar Eventos
-                    </Link>
-                    <Link to="/relatorios" className="btn-link">
-                      Relatórios
-                    </Link>
-                  </>
-                ) : (
-                  <Link to="/perfil" className="btn-link">
-                    Meu Perfil
-                  </Link>
-                )}
-                <button className="btn-sair" onClick={handleLogout}>
-                  sair
-                </button>
+                <span className="user-greeting">Olá, {usuario.username}</span>
+                <div className="nav-buttons">
+                  {usuario.tipo === "organizador" ? (
+                    <>
+                      <Link to="/admin/eventos" className="nav-btn">Gerenciar Eventos</Link>
+                      <Link to="/relatorios" className="nav-btn">Relatórios</Link>
+                    </>
+                  ) : (
+                    <Link to="/perfil" className="nav-btn">Meu Perfil</Link>
+                  )}
+                  <button onClick={handleLogout} className="nav-btn logout-btn">Sair</button>
+                </div>
               </>
             ) : (
-              <span className="login-text">
-                <Link to="/login">login</Link>
-              </span>
+              <Link to="/login" className="login-btn">Entrar</Link>
             )}
-            <div className="ticket-icon">🎫</div>
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* CARROSSEL DE DESTAQUE */}
-      <section className="carousel-wrapper">
-        <div className="banner-section">
-          {destaques[0] && (
-            <div className="banner-item grande">
-              <img src={destaques[0].imagem} alt={destaques[0].nome} />
-            </div>
-          )}
-
-          {destaqueAtual && (
-            <div className="banner-item centro">
-              <img src={destaqueAtual.imagem} alt={destaqueAtual.nome} />
-              <div className="banner-info">
-                <h3>{destaqueAtual.nome}</h3>
-                <p>
-                  {destaqueAtual.data} • {destaqueAtual.horario}
-                </p>
-                <p>{destaqueAtual.local}</p>
+      {/* HERO SECTION - 3 IMAGENS COM INFORMAÇÕES */}
+      <section className="hero-section">
+        <div className="hero-grid">
+          {destaques[carouselIndex] && (
+            <div className="hero-card">
+              <img src={destaques[carouselIndex].imagem} alt={destaques[carouselIndex].nome} />
+              <div className="hero-overlay">
+                <h3>{destaques[carouselIndex].nome}</h3>
+                <p>{destaques[carouselIndex].data}</p>
               </div>
             </div>
           )}
-
-          {destaques[2] && (
-            <div className="banner-item grande">
-              <img src={destaques[2].imagem} alt={destaques[2].nome} />
+          {destaques[(carouselIndex + 1) % destaques.length] && (
+            <div className="hero-card center">
+              <img src={destaques[(carouselIndex + 1) % destaques.length].imagem} alt={destaques[(carouselIndex + 1) % destaques.length].nome} />
+              <div className="hero-overlay">
+                <h3>{destaques[(carouselIndex + 1) % destaques.length].nome}</h3>
+                <p>{destaques[(carouselIndex + 1) % destaques.length].data} • {destaques[(carouselIndex + 1) % destaques.length].horario}</p>
+                <p className="hero-local">📍 {destaques[(carouselIndex + 1) % destaques.length].local}</p>
+              </div>
+            </div>
+          )}
+          {destaques[(carouselIndex + 2) % destaques.length] && (
+            <div className="hero-card">
+              <img src={destaques[(carouselIndex + 2) % destaques.length].imagem} alt={destaques[(carouselIndex + 2) % destaques.length].nome} />
+              <div className="hero-overlay">
+                <h3>{destaques[(carouselIndex + 2) % destaques.length].nome}</h3>
+                <p>{destaques[(carouselIndex + 2) % destaques.length].data}</p>
+              </div>
             </div>
           )}
         </div>
 
+        {/* Indicadores */}
         <div className="carousel-dots">
-          {destaques.map((d, idx) => (
+          {destaques.map((_, idx) => (
             <span
-              key={d.id}
-              className={`dot ${idx === indexDestaque ? "active" : ""}`}
-              onClick={() => setIndexDestaque(idx)}
+              key={idx}
+              className={`dot ${idx === carouselIndex ? 'active' : ''}`}
+              onClick={() => setCarouselIndex(idx)}
             />
           ))}
         </div>
       </section>
 
-      {/* CATEGORIAS COM FILTRO */}
-      <section className="categorias-section">
-        <h2>Categoria</h2>
-        <div className="categorias-row">
+      {/* CATEGORIAS */}
+      <section className="categories-section">
+        <h2 className="section-title">Categorias</h2>
+        <div className="categories-list">
           {categorias.map((cat) => (
-            <button
+            <div
               key={cat}
-              type="button"
-              className={`categoria-card ${categoriaAtiva === cat ? "ativa" : ""
-                }`}
+              className={`category-card ${categoriaAtiva === cat ? 'active' : ''}`}
               onClick={() => setCategoriaAtiva(cat)}
             >
-              <div className="categoria-avatar">
-                <span>{getCategoriaEmoji(cat)}</span>
-              </div>
-              <span className="categoria-label">
-                {cat === "todos" ? "Todos" : cat}
+              <div className="cat-icon-emoji">{getCategoriaEmoji(cat)}</div>
+              <span className="cat-name">
+                {cat === 'todos' ? 'Todos' : cat.charAt(0).toUpperCase() + cat.slice(1)}
               </span>
-            </button>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* LISTA DE EVENTOS */}
-      <section id="eventos" className="eventos-section">
-        <h2>Eventos</h2>
-
-        {eventosFiltrados.length === 0 ? (
-          <p>Nenhum evento encontrado para esta categoria.</p>
-        ) : (
-          <div className="eventos-grid">
-            {eventosFiltrados.map((e) => (
-              <div key={e.id} className="evento-card">
-                {e.imagem && (
-                  <img
-                    src={e.imagem}
-                    alt={e.nome}
-                    className="evento-thumb"
-                  />
-                )}
-
-                <div className="evento-info">
-                  <h3>{e.nome}</h3>
-                  <p className="meta">
-                    {e.data} às {e.horario}
-                  </p>
-                  <p className="meta-local">{e.local}</p>
-                  <Link to={`/evento/${e.id}`} className="btn-roxo">
-                    Ver detalhes
-                  </Link>
+      {/* EVENTOS */}
+      <section className="events-section">
+        <h2 className="section-title">Eventos</h2>
+        <div className="events-grid">
+          {eventosFiltrados.map((evento) => (
+            <div key={evento.id} className="event-card">
+              <img src={evento.imagem} alt={evento.nome} className="event-image" />
+              <div className="event-details">
+                <h3 className="event-title">{evento.nome}</h3>
+                <p className="event-meta">{evento.data} às {evento.horario}</p>
+                <div className="location-pin">
+                  <span>📍</span> {evento.local}
                 </div>
+                <Link to={`/evento/${evento.id}`} className="event-btn">
+                  Ver Detalhes
+                </Link>
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );

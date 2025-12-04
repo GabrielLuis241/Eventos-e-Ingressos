@@ -15,7 +15,6 @@ export default function Login() {
     setErro("");
 
     try {
-      // 1. Login na API -> recebe tokens JWT
       const data = await apiPost("/login/", {
         username,
         password: senha,
@@ -23,30 +22,22 @@ export default function Login() {
 
       const { access, refresh } = data;
 
-      // 2. Guardar tokens
       localStorage.setItem("accessToken", access);
       localStorage.setItem("refreshToken", refresh);
 
-      // 3. Buscar perfil autenticado (usa Authorization automático do apiGet)
       const perfil = await apiGet("/usuarios/perfil/");
 
-      // 4. Guardar usuário logado
       localStorage.setItem(
         "usuarioLogado",
         JSON.stringify({
           id: perfil.id,
           username: perfil.username,
           email: perfil.email,
-          tipo: perfil.tipo, // "cliente" ou "organizador"
+          tipo: perfil.tipo,
         })
       );
 
-      // 5. Redirecionar conforme tipo
-      if (perfil.tipo === "organizador") {
-        navigate("/");
-      } else {
-        navigate("/");
-      }
+      navigate("/");
     } catch (err) {
       console.error(err);
       setErro("Falha no login. Verifique usuário e senha.");
@@ -75,16 +66,14 @@ export default function Login() {
         <button type="submit">Entrar</button>
       </form>
 
-      {erro && <p className="erro">{erro}</p>}
+      {erro && <div className="erro">{erro}</div>}
 
       <div className="cadastro-links">
         <p>
-          Não tem conta?{" "}
-          <Link to="/cadastro/usuario">Cadastrar Usuário (cliente)</Link>
+          Não tem conta? <Link to="/cadastro/usuario">Cadastre-se</Link>
         </p>
         <p>
-          É organizador e ainda não tem conta?{" "}
-          <Link to="/cadastro/admin">Cadastrar Organizador</Link>
+          Organizador? <Link to="/cadastro/admin">Criar conta</Link>
         </p>
       </div>
     </div>
