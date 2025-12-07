@@ -12,8 +12,8 @@ class EventoListView(generics.ListAPIView):
     serializer_class = EventoSerializer
 
 
-# US02 – Detalhes de um evento
-class EventoDetailView(generics.RetrieveAPIView):
+# US02 – Detalhes de um evento (e suporte a Edição/Exclusão)
+class EventoDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Evento.objects.all()
     serializer_class = EventoSerializer
     lookup_field = "pk"

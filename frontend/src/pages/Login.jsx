@@ -1,67 +1,59 @@
+// src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
+import { apiPost, apiGet } from "../api";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
-  const [tipoLogin, setTipoLogin] = useState("usuario"); // valor inicial
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setErro("");
 
-    const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
-    const adms = JSON.parse(localStorage.getItem("adms")) || [];
+    try {
+      const data = await apiPost("/login/", {
+        username,
+        password: senha,
+      });
 
-    let usuarioEncontrado;
-    if (tipoLogin === "usuario") {
-      usuarioEncontrado = usuarios.find((u) => u.email === email && u.senha === senha);
-    } else if (tipoLogin === "organizador") {
-      usuarioEncontrado = adms.find((a) => a.email === email && a.senha === senha);
+      const { access, refresh } = data;
+
+      localStorage.setItem("accessToken", access);
+      localStorage.setItem("refreshToken", refresh);
+
+      const perfil = await apiGet("/usuarios/perfil/");
+
+      localStorage.setItem(
+        "usuarioLogado",
+        JSON.stringify({
+          id: perfil.id,
+          username: perfil.username,
+          email: perfil.email,
+          tipo: perfil.tipo,
+        })
+      );
+
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      setErro("Falha no login. Verifique usuário e senha.");
     }
-
-    if (usuarioEncontrado) {
-      localStorage.setItem("usuarioLogado", JSON.stringify({ ...usuarioEncontrado, tipo: tipoLogin }));
-      // depois do login, redirecionar conforme tipo
-      if (tipoLogin === "usuario") {
-        navigate("/"); // home usuário, lista de eventos para compra
-      } else if (tipoLogin === "organizador") {
-        navigate("/admin/eventos"); // admin colaborador, gerenciar eventos
-      }
-      return;
-    }
-    setErro("E-mail ou senha incorretos para o tipo selecionado");
   };
 
   return (
     <div className="login-container">
       <h2>Login</h2>
 
-      <div className="tipo-login">
-        <button
-          type="button"
-          onClick={() => setTipoLogin("usuario")}
-          className={tipoLogin === "usuario" ? "ativo" : ""}
-        >
-          Usuário
-        </button>
-        <button
-          type="button"
-          onClick={() => setTipoLogin("organizador")}
-          className={tipoLogin === "organizador" ? "ativo" : ""}
-        >
-          Organizador
-        </button>
-      </div>
-
       <form onSubmit={handleLogin}>
         <input
-          type="email"
-          placeholder="E-mail"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          placeholder="Usuário"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
         />
         <input
@@ -74,11 +66,14 @@ export default function Login() {
         <button type="submit">Entrar</button>
       </form>
 
-      {erro && <p className="erro">{erro}</p>}
+      {erro && <div className="erro">{erro}</div>}
 
       <div className="cadastro-links">
         <p>
-          Não tem conta? <Link to="/cadastro/usuario">Cadastrar Usuário</Link>
+          Não tem conta? <Link to="/cadastro/usuario">Cadastre-se</Link>
+        </p>
+        <p>
+          Organizador? <Link to="/cadastro/admin">Criar conta</Link>
         </p>
       </div>
     </div>

@@ -8,6 +8,8 @@ class Evento(models.Model):
     horario = models.TimeField()
     local = models.CharField(max_length=200)
     ingressos_disponiveis = models.PositiveIntegerField(default=0)
+    imagem = models.URLField(max_length=500, blank=True, null=True)
+    categoria = models.CharField(max_length=50, default='outros')
 
     def __str__(self):
         return self.nome

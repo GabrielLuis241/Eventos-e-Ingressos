@@ -15,7 +15,7 @@ export default function ConfirmacaoCompra() {
 
       <div className="acoes">
         <button onClick={() => window.print()}>Baixar Ingresso</button>
-        <button onClick={() => navigate("/")}>Voltar à Home</button>
+        <button onClick={() => navigate("/")}>Voltar à Home</button>  4'
       </div>
     </div>
   );

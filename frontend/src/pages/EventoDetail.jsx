@@ -11,12 +11,10 @@ export default function EventoDetail() {
 
   const [quantidade, setQuantidade] = useState(1);
   const [comprador, setComprador] = useState('');
-  const [comprando, setComprando] = useState(false);
   const [mensagem, setMensagem] = useState(null);
 
   const usuarioLogado = localStorage.getItem("usuarioLogado");
   const estaLogado = !!usuarioLogado;
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,7 +26,7 @@ export default function EventoDetail() {
           setLoading(false);
         }
       })
-      .catch(e => {
+      .catch(() => {
         if (mounted) {
           setErro('Erro ao carregar evento');
           setLoading(false);
@@ -37,11 +35,11 @@ export default function EventoDetail() {
     return () => { mounted = false; };
   }, [id]);
 
-  if (loading) return <div>Carregando evento...</div>;
+  if (loading) return <div className="loading">Carregando evento...</div>;
   if (erro) return <div className="error">Erro: {erro}</div>;
-  if (!evento) return <div>Evento não encontrado.</div>;
+  if (!evento) return <div className="not-found">Evento não encontrado.</div>;
 
-  const handleComprar = (e) => {
+  const handlePix = (e) => {
     e.preventDefault();
     setMensagem(null);
 
@@ -54,66 +52,106 @@ export default function EventoDetail() {
       return;
     }
 
-    setMensagem('Compra simulada! (sem integração com API)');
-    setEvento(prev => ({
-      ...prev,
-      ingressos_disponiveis: prev.ingressos_disponiveis - quantidade
-    }));
-    setQuantidade(1);
-    setComprador('');
-    navigate("/pagamento/pix"); // Redireciona para pagamento pix
+    // aqui só faria a validação/simulação rápida
+    navigate("/pagamento/pix");
+  };
+
+  const handleCartao = () => {
+    navigate("/pagamento/cartao");
   };
 
   return (
     <div className="evento-detail">
-      <Link to="/" className="back">← Voltar</Link>
-      <h2>{evento.nome}</h2>
+      <Link to="/" className="back-btn">← Voltar aos eventos</Link>
+
+      <header className="evento-header">
+        <h1 className="evento-titulo">{evento.nome}</h1>
+        <div className="evento-meta">
+          <span className="meta-item">{evento.data}</span>
+          <span className="meta-item">{evento.horario}</span>
+          <span className="meta-item">{evento.local}</span>
+        </div>
+      </header>
+
       <div className="detail-grid">
-        <img
-          src={evento.imagem || 'https://via.placeholder.com/600x320?text=Sem+imagem'}
-          alt={evento.nome}
-          className="detail-img"
-        />
-        <div className="detail-info">
-          <p className="meta">{evento.data} • {evento.horario} — {evento.local}</p>
-          <p>{evento.descricao}</p>
-          <p><strong>Ingressos disponíveis:</strong> {evento.ingressos_disponiveis}</p>
+        <div className="detail-image-container">
+          <img
+            src={evento.imagem || 'https://via.placeholder.com/600x400?text=Sem+Imagem+do+Evento'}
+            alt={evento.nome}
+            className="detail-img"
+          />
+        </div>
+
+        <div className="detail-content">
+          <div className="evento-descricao">
+            <h3>Sobre o evento</h3>
+            <p>{evento.descricao}</p>
+          </div>
+
+          <div className="ingressos-info">
+            <h3>Ingressos disponíveis</h3>
+            <div className="contador-ingressos">
+              <span className="numero-ingressos">{evento.ingressos_disponiveis}</span>
+              <span className="label-ingressos">tickets</span>
+            </div>
+          </div>
 
           {estaLogado ? (
-            <form onSubmit={handleComprar} className="purchase-form">
-              <h3>Comprar ingresso</h3>
-              <label>
-                Quantidade
+            <form onSubmit={handlePix} className="purchase-form">
+              <h3>Comprar ingressos</h3>
+
+              <div className="form-group">
+                <label>Quantidade</label>
                 <input
                   type="number"
                   min="1"
                   max={evento.ingressos_disponiveis}
                   value={quantidade}
                   onChange={e => setQuantidade(Number(e.target.value))}
-                  disabled={comprando}
+                  className="input-quantidade"
                 />
-              </label>
-              <label>
-                Nome do comprador (opcional)
+              </div>
+
+              <div className="form-group">
+                <label>Nome do comprador (opcional)</label>
                 <input
                   type="text"
                   value={comprador}
                   onChange={e => setComprador(e.target.value)}
                   placeholder="Nome para o ingresso"
-                  disabled={comprando}
+                  className="input-text"
                 />
-              </label>
-              <button
-                type="submit"
-                className="btn"
-                disabled={comprando || evento.ingressos_disponiveis === 0}
-              >
-                {comprando ? 'Processando...' : 'Comprar'}
-              </button>
-              {mensagem && <p className={mensagem.includes('Erro') ? 'message erro' : 'message sucesso'}>{mensagem}</p>}
+              </div>
+
+              <div className="payment-buttons">
+                <button
+                  type="submit"
+                  className="btn btn-pix"
+                  disabled={evento.ingressos_disponiveis === 0}
+                >
+                  Pagar com PIX
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-cartao"
+                  onClick={handleCartao}
+                  disabled={evento.ingressos_disponiveis === 0}
+                >
+                  Cartão de Crédito
+                </button>
+              </div>
+
+              {mensagem && (
+                <div className={`message ${mensagem.includes('Erro') ? 'erro' : 'sucesso'}`}>
+                  {mensagem}
+                </div>
+              )}
             </form>
           ) : (
-            <p>Você precisa estar logado para comprar ingressos.</p>
+            <div className="login-prompt">
+              <p>🔐 Você precisa estar <Link to="/login">logado</Link> para comprar ingressos.</p>
+            </div>
           )}
         </div>
       </div>

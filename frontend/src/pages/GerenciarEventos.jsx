@@ -1,11 +1,12 @@
+// src/pages/GerenciarEventos.jsx
 import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "./GerenciarEventos.css";
 import { listarEventos, criarEvento, removerEvento } from "../api";
 
 export default function GerenciarEventos() {
   const [eventos, setEventos] = useState([]);
   const [mostrarModal, setMostrarModal] = useState(false);
-
   const [form, setForm] = useState({
     nome: "",
     descricao: "",
@@ -14,7 +15,10 @@ export default function GerenciarEventos() {
     local: "",
     ingressos_disponiveis: 0,
     imagem: "",
+    categoria: "show",
   });
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     listarEventos()
@@ -37,6 +41,7 @@ export default function GerenciarEventos() {
       local: form.local,
       ingressos_disponiveis: Number(form.ingressos_disponiveis || 0),
       imagem: form.imagem,
+      categoria: form.categoria,
     };
 
     try {
@@ -52,6 +57,7 @@ export default function GerenciarEventos() {
         local: "",
         ingressos_disponiveis: 0,
         imagem: "",
+        categoria: "show",
       });
     } catch (err) {
       alert("Erro ao criar evento.");
@@ -73,41 +79,73 @@ export default function GerenciarEventos() {
   }
 
   return (
-    <div className="gerenciar-container">
+    <div className="gerenciar-page">
       <h1 className="titulo">Gerenciar Eventos</h1>
 
-      <button className="btn-roxo" onClick={() => setMostrarModal(true)}>
+      <button
+        className="btn-roxo-criar"
+        onClick={() => setMostrarModal(true)}
+      >
         Criar Novo Evento
       </button>
 
-      <div className="lista-eventos">
-        {eventos.map((evento) => (
-          <div key={evento.id} className="card-evento">
-            {evento.imagem && (
-              <img src={evento.imagem} alt={evento.nome} />
-            )}
-            <div className="info">
-              <h3>{evento.nome}</h3>
-              <p>
+      {/* GRID DE CARDS ESTILO HOME */}
+      <section className="eventos-section-admin">
+        <div className="eventos-grid-admin">
+          {eventos.map((evento) => (
+            <div key={evento.id} className="evento-card-admin">
+              <div className="evento-header-admin">
+                <h3>{evento.nome}</h3>
+
+                <div className="acoes-header-admin">
+                  {/* BOTÃO EDITAR EVENTO */}
+                  <button
+                    className="btn-editar-admin"
+                    onClick={() =>
+                      navigate(`/admin/eventos/${evento.id}/editar`)
+                    }
+                    title="Editar evento"
+                  >
+                    ✏
+                  </button>
+
+                  {/* BOTÃO EXCLUIR EVENTO */}
+                  <button
+                    className="btn-excluir-admin"
+                    onClick={() => handleExcluirEvento(evento.id)}
+                    title="Excluir evento"
+                  >
+                    🗑
+                  </button>
+                </div>
+              </div>
+
+              <p className="meta-admin">
                 {evento.data} — {evento.horario}
               </p>
-              <p>{evento.local}</p>
+              <p className="meta-local-admin">{evento.local}</p>
+
+              <div className="acoes-admin">
+                <Link
+                  to={`/admin/eventos/${evento.id}`}
+                  className="btn-roxo-admin"
+                >
+                  Ver detalhes
+                </Link>
+              </div>
             </div>
+          ))}
+        </div>
+      </section>
 
-            <button
-              onClick={() => handleExcluirEvento(evento.id)}
-              className="btn-excluir"
-            >
-              🗑
-            </button>
-          </div>
-        ))}
-      </div>
-
+      {/* MODAL DE CRIAR EVENTO */}
       {mostrarModal && (
         <div className="modal-bg">
           <div className="modal">
-            <button className="fechar" onClick={() => setMostrarModal(false)}>
+            <button
+              className="fechar"
+              onClick={() => setMostrarModal(false)}
+            >
               ✖
             </button>
 
@@ -191,8 +229,21 @@ export default function GerenciarEventos() {
                 onChange={atualizarForm}
               />
 
+              <label>Categoria *</label>
+              <select
+                name="categoria"
+                value={form.categoria}
+                onChange={atualizarForm}
+                required
+              >
+                <option value="show">🎵 Show</option>
+                <option value="teatro">🎭 Teatro</option>
+                <option value="palestra">🎤 Palestra</option>
+                <option value="outros">⭐ Outros</option>
+              </select>
+
               <div className="botoes-modal">
-                <button type="submit" className="btn-roxo">
+                <button type="submit" className="btn-roxo-criar">
                   Criar Evento
                 </button>
 

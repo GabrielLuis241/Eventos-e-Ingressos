@@ -1,31 +1,70 @@
 /* src/index.css */
-body {
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Premium Purple Theme */
+  --primary: #4c1d95;
+  /* Deep Purple */
+  --primary-light: #6d28d9;
+  --primary-lighter: #8b5cf6;
+  --accent: #f59e0b;
+  /* Amber/Gold for contrast */
+
+  --bg-page: #f3f4f6;
+  --bg-card: #ffffff;
+
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --text-light: #ffffff;
+
+  --radius: 12px;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+* {
+  box-sizing: border-box;
   margin: 0;
-  background: #fff;
-  color: var(--texto);
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
   text-decoration: none;
-  color: var(--roxo-primario);
-  transition: 0.3s;
+  color: inherit;
 }
 
-a:hover {
-  color: var(--roxo-escuro);
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+/* Global Utilities */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .btn {
-  background: var(--roxo-primario);
-  color: #fff;
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
   font-weight: 600;
-  transition: 0.3s;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .btn:hover {
-  background: var(--roxo-escuro);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
 }
