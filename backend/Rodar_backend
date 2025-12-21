@@ -1,17 +1,41 @@
-1 - Criar e ativar o venv:
+1 - Verificar os Pré-requisitos:
+        python --version
+        pip --version
 
+2 - Criar o venv:
         python -m venv venv
+
+3 - Ativar o venv:
         venv\Scripts\activate 
 
-2 - Instalar dependências:
-       
-        python -m pip install djangorestframework-simplejwt
+4 - Instalar dependências:
+        pip install -r requirements.txt
 
-3 - Rodar migrações:
+5 - Criar o arquivo .env:
+        echo DATABASE_URL=sqlite:///./database.db > .env
 
-        python manage.py migrate
+6 - Subir o servidor:
+        uvicorn app.main:app --reload
 
-4 - Rodar servidor:
-        python manage.py runserver
+7 — Acessar no navegador:
 
-"http://127.0.0.1:8000/ pra ver o backend rodando"
+API:
+        http://localhost:8000
+
+Documentação (essencial):
+        http://localhost:8000/docs
+
+
+Possiveis erros:
+        erro:'uvicorn' is not recognized
+        solução:pip install uvicorn
+
+        erro:Porta em uso
+        solução:uvicorn app.main:app --reload --port 8001
+
+Resumo dos comando:
+        cd backend
+        python -m venv venv
+        venv\Scripts\activate.bat
+        pip install -r requirements.txt
+        uvicorn app.main:app --reload
