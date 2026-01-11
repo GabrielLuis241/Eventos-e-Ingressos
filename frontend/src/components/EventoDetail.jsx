@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { apiGet } from '../api';
+import { buscarEventoPorId } from '../api';
 import './EventoDetail.css';
 
 export default function EventoDetail() {
@@ -20,7 +20,7 @@ export default function EventoDetail() {
 
   useEffect(() => {
     let mounted = true;
-    apiGet(`/eventos/${id}/`)
+    buscarEventoPorId(id)
       .then(data => {
         if (mounted) {
           setEvento(data);
@@ -28,6 +28,7 @@ export default function EventoDetail() {
         }
       })
       .catch(e => {
+        console.error("Erro ao carregar evento:", e);
         if (mounted) {
           setErro('Erro ao carregar evento');
           setLoading(false);

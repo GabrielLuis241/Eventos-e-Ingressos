@@ -13,3 +13,25 @@ def list_events(db: Session):
 
 def get_event(db: Session, event_id: int):
     return db.query(Event).filter(Event.id == event_id).first()
+
+def update_event(db: Session, event_id: int, data: dict):
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if not event:
+        raise Exception("Evento não encontrado")
+    
+    for key, value in data.items():
+        if hasattr(event, key):
+            setattr(event, key, value)
+    
+    db.commit()
+    db.refresh(event)
+    return event
+
+def delete_event(db: Session, event_id: int):
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if not event:
+        raise Exception("Evento não encontrado")
+    
+    db.delete(event)
+    db.commit()
+    return {"message": "Evento deletado com sucesso"}

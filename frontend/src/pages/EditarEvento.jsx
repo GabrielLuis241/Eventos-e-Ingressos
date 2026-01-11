@@ -32,7 +32,7 @@ export default function EditarEvento() {
       data: form.data,
       horario: form.horario,
       local: form.local,
-      ingressos_disponiveis: Number(form.ingressos_disponiveis || 0),
+      total_tickets: Number(form.ingressos_disponiveis || 0), // Backend espera total_tickets
     };
 
     try {

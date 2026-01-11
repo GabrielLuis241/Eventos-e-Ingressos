@@ -1,7 +1,7 @@
 // src/components/EventoList.jsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { apiGet } from '../api';
+import { listarEventos } from '../api';
 
 export default function EventoList() {
   const [eventos, setEventos] = useState([]);
@@ -34,10 +34,10 @@ export default function EventoList() {
       }
     ];
 
-    apiGet('/eventos/')
+    listarEventos()
       .then(data => {
         if (mounted) {
-          if (data.length === 0) {
+          if (!data || data.length === 0) {
             setEventos(dadosTeste);
           } else {
             setEventos(data);
@@ -46,6 +46,7 @@ export default function EventoList() {
         }
       })
       .catch(e => {
+        console.error('Erro ao carregar eventos:', e);
         if (mounted) {
           console.warn('Usando dados de teste:', e.message);
           setEventos(dadosTeste); 

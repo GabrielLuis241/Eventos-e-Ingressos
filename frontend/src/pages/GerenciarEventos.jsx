@@ -39,9 +39,9 @@ export default function GerenciarEventos() {
       data: form.data,
       horario: form.horario,
       local: form.local,
-      ingressos_disponiveis: Number(form.ingressos_disponiveis || 0),
+      total_tickets: Number(form.ingressos_disponiveis || 0), // Backend espera total_tickets
       imagem: form.imagem,
-      categoria: form.categoria,
+      categoria: form.categoria, // Campo extra, não enviado ao backend
     };
 
     try {

@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Home.css";
-import { apiGet } from "../api";
+import { listarEventos } from "../api";
 
 export default function Home() {
   const [eventos, setEventos] = useState([]);
@@ -62,7 +62,7 @@ export default function Home() {
       },
     ];
 
-    apiGet("/eventos/")
+    listarEventos()
       .then((data) => {
         if (!mounted) return;
         if (!data || data.length === 0) {
@@ -77,7 +77,8 @@ export default function Home() {
         }
         setLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Erro ao carregar eventos:", err);
         if (!mounted) return;
         setEventos(dadosTeste);
         setLoading(false);

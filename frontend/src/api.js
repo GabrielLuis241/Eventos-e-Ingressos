@@ -1,5 +1,15 @@
 // src/api.js
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8000/api";
+// ATUALIZADO: Backend não tem prefixo /api - REMOVIDO /api
+// Versão: 4.0 - FORÇANDO SEM /api - REMOVENDO VARIÁVEL DE AMBIENTE
+// FORÇANDO URL SEM /api - IGNORANDO VARIÁVEL DE AMBIENTE SE TIVER /api
+let envUrl = process.env.REACT_APP_API_URL || "";
+if (envUrl && envUrl.includes("/api")) {
+  console.warn("⚠️ REACT_APP_API_URL tem /api - REMOVENDO:", envUrl);
+  envUrl = envUrl.replace("/api", "");
+}
+const API_BASE = envUrl || "http://localhost:8000";
+console.log("🚀🚀🚀 api.js VERSÃO 4.0 CARREGADO - API_BASE:", API_BASE);
+console.log("🚀🚀🚀 CÓDIGO NOVO CONFIRMADO - SEM /api");
 
 async function handleResponse(res, path, method) {
   if (!res.ok) {
@@ -13,9 +23,12 @@ async function handleResponse(res, path, method) {
 // Helpers base com JWT (se houver token salvo)
 export async function apiGet(path) {
   const token = localStorage.getItem("accessToken");
-  const res = await fetch(`${API_BASE}${path}`, {
+  const url = `${API_BASE}${path}`;
+  console.log("🔵 API GET:", url); // Debug
+  const res = await fetch(url, {
     method: "GET",
     headers: {
+      "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
@@ -53,32 +66,76 @@ export async function apiDelete(path) {
   const res = await fetch(`${API_BASE}${path}`, {
     method: "DELETE",
     headers: {
+      "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
   return handleResponse(res, path, "DELETE");
 }
 
-// Eventos
+// Funções de mapeamento de campos: Português (frontend) ↔ Inglês (backend)
+function eventoParaBackend(evento) {
+  // Remove campos undefined/null para evitar enviar campos vazios
+  const payload = {
+    name: evento.nome || evento.name,
+    description: evento.descricao || evento.description || "",
+    date: evento.data || evento.date,
+    time: evento.horario || evento.time,
+    location: evento.local || evento.location,
+    image: evento.imagem || evento.image || "",
+    total_tickets: evento.total_tickets || evento.ingressos_disponiveis || evento.ingressos_totais || 0,
+  };
+  // Remove campos vazios que não são obrigatórios
+  if (!payload.image) delete payload.image;
+  return payload;
+}
+
+function eventoParaFrontend(evento) {
+  if (!evento) return null;
+  return {
+    id: evento.id,
+    nome: evento.name || evento.nome,
+    descricao: evento.description || evento.descricao,
+    data: evento.date || evento.data,
+    horario: evento.time || evento.horario,
+    local: evento.location || evento.local,
+    imagem: evento.image || evento.imagem,
+    ingressos_disponiveis: evento.available_tickets ?? evento.ingressos_disponiveis,
+    total_tickets: evento.total_tickets,
+    categoria: evento.categoria || "outros", // Campo adicional do frontend
+  };
+}
+
+// Eventos - Endpoints públicos
 export async function listarEventos() {
-  return apiGet("/eventos/");
+  const eventos = await apiGet("/eventos");
+  // Se for array, converter cada evento
+  if (Array.isArray(eventos)) {
+    return eventos.map(eventoParaFrontend);
+  }
+  return eventos;
 }
 
 export async function buscarEventoPorId(id) {
-  return apiGet(`/eventos/${id}/`);
+  const evento = await apiGet(`/eventos/${id}`);
+  return eventoParaFrontend(evento);
 }
 
+// Eventos - Endpoints admin (CRUD)
 export async function criarEvento(dados) {
-  // conforme documentação: POST /api/eventos/criar/
-  return apiPost("/eventos/criar/", dados);
+  const payload = eventoParaBackend(dados);
+  const evento = await apiPost("/admin/eventos", payload);
+  return eventoParaFrontend(evento);
 }
 
 export async function atualizarEvento(id, dados) {
-  return apiPut(`/eventos/${id}/`, dados);
+  const payload = eventoParaBackend(dados);
+  const evento = await apiPut(`/admin/eventos/${id}`, payload);
+  return eventoParaFrontend(evento);
 }
 
 export async function removerEvento(id) {
-  return apiDelete(`/eventos/${id}/`);
+  return apiDelete(`/admin/eventos/${id}`);
 }
 
 // Ingressos (compra direta)
