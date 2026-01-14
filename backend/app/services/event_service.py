@@ -8,8 +8,21 @@ def create_event(db: Session, data):
     db.refresh(event)
     return event
 
-def list_events(db: Session):
-    return db.query(Event).all()
+def list_events(db: Session, search: str = None, location: str = None):
+    query = db.query(Event)
+    
+    # Filtro de busca (Nome ou Descrição)
+    if search:
+        query = query.filter(
+            (Event.name.ilike(f"%{search}%")) | 
+            (Event.description.ilike(f"%{search}%"))
+        )
+    
+    # Filtro de Localização
+    if location:
+        query = query.filter(Event.location.ilike(f"%{location}%"))
+        
+    return query.all()
 
 def get_event(db: Session, event_id: int):
     return db.query(Event).filter(Event.id == event_id).first()

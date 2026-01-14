@@ -1,23 +1,22 @@
 from pydantic import BaseModel
+from typing import Optional
 
-class EventCreate(BaseModel):
+class EventBase(BaseModel):
     name: str
     description: str
     date: str
     time: str
     location: str
-    image: str
+    image: Optional[str] = None
     total_tickets: int
+    price: float # Adicionado aqui
 
-class EventUpdate(BaseModel):
-    name: str | None = None
-    description: str | None = None
-    date: str | None = None
-    time: str | None = None
-    location: str | None = None
-    image: str | None = None
-    total_tickets: int | None = None
+class EventCreate(EventBase):
+    pass
 
-class EventResponse(EventCreate):
+class EventResponse(EventBase):
     id: int
     available_tickets: int
+
+    class Config:
+        from_attributes = True
