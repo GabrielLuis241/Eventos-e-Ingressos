@@ -9,6 +9,7 @@ class Purchase(Base):
     id = Column(Integer, primary_key=True)
     event_id = Column(Integer, ForeignKey("events.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
+    quantity = Column(Integer) # Quantidade de ingressos comprados
     total_value = Column(Float) # US03: Preço do evento * quantidade
     payment_type = Column(String) # US04/05: 'cartao' ou 'pix'
     status = Column(String, default="pendente") # pendente, pago, cancelado

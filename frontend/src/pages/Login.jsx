@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
-import { apiPost, apiGet } from "../api";
+import { fazerLogin } from "../api";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -15,28 +15,10 @@ export default function Login() {
     setErro("");
 
     try {
-      const data = await apiPost("/login/", {
-        username,
-        password: senha,
-      });
+      // A função fazerLogin já armazena tudo no localStorage
+      await fazerLogin(username, senha);
 
-      const { access, refresh } = data;
-
-      localStorage.setItem("accessToken", access);
-      localStorage.setItem("refreshToken", refresh);
-
-      const perfil = await apiGet("/usuarios/perfil/");
-
-      localStorage.setItem(
-        "usuarioLogado",
-        JSON.stringify({
-          id: perfil.id,
-          username: perfil.username,
-          email: perfil.email,
-          tipo: perfil.tipo,
-        })
-      );
-
+      alert("Login realizado com sucesso!");
       navigate("/");
     } catch (err) {
       console.error(err);

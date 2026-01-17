@@ -14,6 +14,16 @@ class EventBase(BaseModel):
 class EventCreate(EventBase):
     pass
 
+class EventUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    date: Optional[str] = None
+    time: Optional[str] = None
+    location: Optional[str] = None
+    image: Optional[str] = None
+    total_tickets: Optional[int] = None
+    price: Optional[float] = None
+
 class EventResponse(EventBase):
     id: int
     available_tickets: int

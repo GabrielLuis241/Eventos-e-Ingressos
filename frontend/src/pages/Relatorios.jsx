@@ -2,87 +2,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Relatorios.css";
+import { obterDashboardCompleto, exportarRelatorioCSV } from "../api";
 
 export default function Relatorios() {
   const [usuario, setUsuario] = useState(null);
+  const [relatorios, setRelatorios] = useState(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
   const navigate = useNavigate();
-
-  // Mock data - preparado para receber do backend
-  const [relatorios, setRelatorios] = useState({
-    totalVendas: 45750.00,
-    totalIngressos: 183,
-    totalEventos: 5,
-    vendasPorEvento: [
-      {
-        id: 1,
-        nomeEvento: "Show ao Vivo",
-        ingressosVendidos: 85,
-        valorTotal: 21250.00,
-        data: "2025-06-13"
-      },
-      {
-        id: 2,
-        nomeEvento: "Peça de Teatro",
-        ingressosVendidos: 42,
-        valorTotal: 8400.00,
-        data: "2025-06-20"
-      },
-      {
-        id: 3,
-        nomeEvento: "Palestra de Tecnologia",
-        ingressosVendidos: 56,
-        valorTotal: 16100.00,
-        data: "2025-07-05"
-      }
-    ],
-    clientes: [
-      {
-        id: 1,
-        nome: "João Silva",
-        email: "joao@email.com",
-        evento: "Show ao Vivo",
-        quantidade: 2,
-        valorTotal: 500.00,
-        dataCompra: "2025-05-15"
-      },
-      {
-        id: 2,
-        nome: "Maria Santos",
-        email: "maria@email.com",
-        evento: "Peça de Teatro",
-        quantidade: 4,
-        valorTotal: 800.00,
-        dataCompra: "2025-05-18"
-      },
-      {
-        id: 3,
-        nome: "Pedro Oliveira",
-        email: "pedro@email.com",
-        evento: "Palestra de Tecnologia",
-        quantidade: 1,
-        valorTotal: 150.00,
-        dataCompra: "2025-05-20"
-      },
-      {
-        id: 4,
-        nome: "Ana Costa",
-        email: "ana@email.com",
-        evento: "Show ao Vivo",
-        quantidade: 3,
-        valorTotal: 750.00,
-        dataCompra: "2025-05-22"
-      },
-      {
-        id: 5,
-        nome: "Carlos Ferreira",
-        email: "carlos@email.com",
-        evento: "Palestra de Tecnologia",
-        quantidade: 2,
-        valorTotal: 300.00,
-        dataCompra: "2025-05-25"
-      }
-    ]
-  });
 
   useEffect(() => {
     const salvo = localStorage.getItem("usuarioLogado");
@@ -93,7 +20,7 @@ export default function Relatorios() {
 
     try {
       const user = JSON.parse(salvo);
-      if (user.tipo !== "organizador") {
+      if (user.user_type !== "organizador") {
         alert("Acesso negado. Apenas organizadores podem acessar relatórios.");
         navigate("/");
         return;
@@ -101,31 +28,47 @@ export default function Relatorios() {
       setUsuario(user);
     } catch {
       navigate("/login");
+      return;
     }
 
-    // Simulação de auto-update (polling)
+    // Buscar dados reais do backend
+    buscarRelatorios();
+
+    // Atualização automática a cada 30 segundos
     const intervalId = setInterval(() => {
-      // Aqui você faria o fetch real: fetchRelatorios();
+      buscarRelatorios();
+    }, 30000);
 
-      // Simulando atualização dos dados para demonstrar o recurso visualmente
-      setRelatorios(prev => ({
-        ...prev,
-        totalVendas: prev.totalVendas + (Math.random() > 0.5 ? 150 : 0),
-        totalIngressos: prev.totalIngressos + (Math.random() > 0.5 ? 1 : 0)
-      }));
-    }, 5000); // Atualiza a cada 5 segundos para demonstração (na vida real seria 30s ou mais)
-
-    // Cleanup do intervalo ao desmontar
     return () => clearInterval(intervalId);
   }, [navigate]);
 
-  // Função preparada para integração com backend
-  const fetchRelatorios = async () => {
+  const buscarRelatorios = async () => {
     try {
-      // const data = await apiGet("/relatorios/");
-      // setRelatorios(data);
+      const dados = await obterDashboardCompleto();
+      setRelatorios(dados);
+      setCarregando(false);
+      setErro("");
     } catch (error) {
       console.error("Erro ao buscar relatórios:", error);
+      setErro("Erro ao carregar relatórios. Tente novamente mais tarde.");
+      setCarregando(false);
+    }
+  };
+
+  const handleExportarCSV = async () => {
+    try {
+      const blob = await exportarRelatorioCSV();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `relatorio_vendas_${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Erro ao exportar CSV:", error);
+      alert("Erro ao exportar relatório. Tente novamente.");
     }
   };
 
@@ -133,10 +76,31 @@ export default function Relatorios() {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("usuarioLogado");
+    localStorage.removeItem("userType");
     navigate("/login");
   }
 
-  if (!usuario) {
+  if (carregando) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Carregando relatórios...</p>
+      </div>
+    );
+  }
+
+  if (erro) {
+    return (
+      <div className="erro-container">
+        <p className="erro-mensagem">{erro}</p>
+        <button onClick={buscarRelatorios} className="btn btn-primary">
+          Tentar Novamente
+        </button>
+      </div>
+    );
+  }
+
+  if (!usuario || !relatorios) {
     return <div className="loading">Carregando...</div>;
   }
 
@@ -152,6 +116,9 @@ export default function Relatorios() {
           </div>
           <div className="header-right">
             <span className="user-name">Olá, {usuario.username}</span>
+            <button onClick={handleExportarCSV} className="btn btn-success btn-sm">
+              📥 Exportar CSV
+            </button>
             <Link to="/admin/eventos" className="btn btn-outline btn-sm">
               Gerenciar Eventos
             </Link>
@@ -201,41 +168,48 @@ export default function Relatorios() {
             <h2>📈 Faturamento por Evento</h2>
           </div>
           <div className="table-wrapper">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Evento</th>
-                  <th>Data</th>
-                  <th>Ingressos Vendidos</th>
-                  <th>Faturamento</th>
-                </tr>
-              </thead>
-              <tbody>
-                {relatorios.vendasPorEvento.map((evento) => (
-                  <tr key={evento.id}>
-                    <td className="event-name">{evento.nomeEvento}</td>
-                    <td>{new Date(evento.data).toLocaleDateString('pt-BR')}</td>
-                    <td className="text-center">{evento.ingressosVendidos}</td>
+            {relatorios.vendasPorEvento.length === 0 ? (
+              <div className="no-data">
+                <p>📭 Nenhuma venda registrada ainda.</p>
+                <p>Quando houver vendas, os dados aparecerão aqui.</p>
+              </div>
+            ) : (
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Evento</th>
+                    <th>Data</th>
+                    <th>Ingressos Vendidos</th>
+                    <th>Faturamento</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {relatorios.vendasPorEvento.map((evento) => (
+                    <tr key={evento.id}>
+                      <td className="event-name">{evento.nomeEvento}</td>
+                      <td>{new Date(evento.data).toLocaleDateString('pt-BR')}</td>
+                      <td className="text-center">{evento.ingressosVendidos}</td>
+                      <td className="value">
+                        R$ {evento.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="total-row">
+                    <td colSpan="2"><strong>Total</strong></td>
+                    <td className="text-center">
+                      <strong>{relatorios.totalIngressos}</strong>
+                    </td>
                     <td className="value">
-                      R$ {evento.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      <strong>
+                        R$ {relatorios.totalVendas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </strong>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="total-row">
-                  <td colSpan="2"><strong>Total</strong></td>
-                  <td className="text-center">
-                    <strong>{relatorios.totalIngressos}</strong>
-                  </td>
-                  <td className="value">
-                    <strong>
-                      R$ {relatorios.totalVendas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </strong>
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
+                </tfoot>
+              </table>
+            )}
           </div>
         </section>
 
@@ -245,32 +219,39 @@ export default function Relatorios() {
             <h2>👥 Clientes que Compraram Ingressos</h2>
           </div>
           <div className="table-wrapper">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Cliente</th>
-                  <th>Email</th>
-                  <th>Evento</th>
-                  <th>Quantidade</th>
-                  <th>Valor Total</th>
-                  <th>Data da Compra</th>
-                </tr>
-              </thead>
-              <tbody>
-                {relatorios.clientes.map((cliente) => (
-                  <tr key={cliente.id}>
-                    <td className="client-name">{cliente.nome}</td>
-                    <td className="email">{cliente.email}</td>
-                    <td>{cliente.evento}</td>
-                    <td className="text-center">{cliente.quantidade}</td>
-                    <td className="value">
-                      R$ {cliente.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </td>
-                    <td>{new Date(cliente.dataCompra).toLocaleDateString('pt-BR')}</td>
+            {relatorios.clientes.length === 0 ? (
+              <div className="no-data">
+                <p>📭 Nenhum cliente registrado ainda.</p>
+                <p>Quando houver compras, os clientes aparecerão aqui.</p>
+              </div>
+            ) : (
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Email</th>
+                    <th>Evento</th>
+                    <th>Quantidade</th>
+                    <th>Valor Total</th>
+                    <th>Data da Compra</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {relatorios.clientes.map((cliente) => (
+                    <tr key={cliente.id}>
+                      <td className="client-name">{cliente.nome}</td>
+                      <td className="email">{cliente.email}</td>
+                      <td>{cliente.evento}</td>
+                      <td className="text-center">{cliente.quantidade}</td>
+                      <td className="value">
+                        R$ {cliente.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </td>
+                      <td>{new Date(cliente.dataCompra).toLocaleDateString('pt-BR')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </section>
       </div>

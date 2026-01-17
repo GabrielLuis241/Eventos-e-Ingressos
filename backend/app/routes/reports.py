@@ -8,6 +8,7 @@ from app.database import SessionLocal
 from app.models.purchase import Purchase
 from app.models.ticket import Ticket
 from app.models.event import Event
+from app.models.user import User
 
 router = APIRouter(prefix="/reports", tags=["Relatórios"])
 
@@ -28,6 +29,80 @@ def obter_relatorio_geral(db: Session = Depends(get_db)):
     return {
         "total_arrecadado": total_arrecadado,
         "total_ingressos_vendidos": total_ingressos_vendidos
+    }
+
+@router.get("/dashboard-completo")
+def obter_dashboard_completo(db: Session = Depends(get_db)):
+    """
+    Retorna todos os dados necessários para o dashboard de relatórios.
+    Inclui: métricas gerais, vendas por evento e lista de clientes que compraram.
+    """
+    # 1. Métricas gerais
+    total_vendas = db.query(func.sum(Purchase.total_value)).filter(Purchase.status == "pago").scalar() or 0.0
+    total_ingressos = db.query(func.count(Ticket.id)).scalar() or 0
+    total_eventos = db.query(func.count(Event.id)).scalar() or 0
+    
+    # 2. Vendas por evento (com JOIN para pegar nome do evento)
+    vendas_por_evento = db.query(
+        Event.id,
+        Event.name,
+        Event.date,
+        func.count(Ticket.id).label("ingressos_vendidos"),
+        func.sum(Purchase.total_value).label("valor_total")
+    ).join(Ticket, Ticket.event_id == Event.id)\
+     .join(Purchase, Purchase.event_id == Event.id)\
+     .filter(Purchase.status == "pago")\
+     .group_by(Event.id, Event.name, Event.date)\
+     .all()
+    
+    vendas_formatadas = [
+        {
+            "id": row.id,
+            "nomeEvento": row.name,
+            "data": row.date,
+            "ingressosVendidos": row.ingressos_vendidos or 0,
+            "valorTotal": float(row.valor_total or 0)
+        }
+        for row in vendas_por_evento
+    ]
+    
+    # 3. Lista de clientes que compraram ingressos
+    # Contar quantos tickets cada compra tem
+    compras = db.query(
+        Purchase.id,
+        User.username,
+        User.email,
+        Event.name.label("evento_nome"),
+        func.count(Ticket.id).label("quantidade_tickets"),
+        Purchase.total_value,
+        Purchase.created_at
+    ).join(User, Purchase.user_id == User.id)\
+     .join(Event, Purchase.event_id == Event.id)\
+     .outerjoin(Ticket, Ticket.purchase_id == Purchase.id)\
+     .filter(Purchase.status == "pago")\
+     .group_by(Purchase.id, User.username, User.email, Event.name, Purchase.total_value, Purchase.created_at)\
+     .order_by(Purchase.created_at.desc())\
+     .all()
+    
+    clientes_formatados = [
+        {
+            "id": row.id,
+            "nome": row.username,
+            "email": row.email,
+            "evento": row.evento_nome,
+            "quantidade": row.quantidade_tickets or 0,
+            "valorTotal": float(row.total_value),
+            "dataCompra": row.created_at.strftime("%Y-%m-%d") if row.created_at else ""
+        }
+        for row in compras
+    ]
+    
+    return {
+        "totalVendas": float(total_vendas),
+        "totalIngressos": total_ingressos,
+        "totalEventos": total_eventos,
+        "vendasPorEvento": vendas_formatadas,
+        "clientes": clientes_formatados
     }
 
 @router.get("/vendas-por-evento/{event_id}")

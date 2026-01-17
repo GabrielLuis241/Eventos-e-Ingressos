@@ -1,0 +1,301 @@
+# ====================================
+# GITIGNORE - Eventos e Ingressos
+# ====================================
+
+# ============ PYTHON / BACKEND ============
+
+# Ambiente virtual Python
+backend/venv/
+backend/env/
+backend/.venv/
+venv/
+env/
+ENV/
+*.virtualenv
+
+# Arquivos compilados Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Banco de dados SQLite
+backend/database.db
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+*.db-journal
+
+# Distribuição / Packaging Python
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+
+# ============ NODE / FRONTEND ============
+
+# Dependências Node.js
+frontend/node_modules/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build do React
+frontend/build/
+build/
+
+# Testes
+coverage/
+.nyc_output
+
+# Arquivos gerados
+*.log
+logs/
+
+# Cache do npm
+.npm
+
+# Cache do yarn
+.yarn/cache
+.yarn/unplugged
+.yarn/install-state.gz
+
+# Cache do Next.js (se usar)
+.next/
+out/
+
+# Cache do Nuxt.js (se usar)
+.nuxt
+dist
+
+# Cache do Gatsby (se usar)
+.cache/
+public
+
+# Vuepress
+.vuepress/dist
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+
+# ============ VARIÁVEIS DE AMBIENTE ============
+
+# Arquivos de ambiente sensíveis
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+frontend/.env
+*.env
+
+
+# ============ IDEs / EDITORES ============
+
+# VSCode
+.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# PyCharm / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Cursor (Editor)
+.cursor/
+
+
+# ============ SISTEMA OPERACIONAL ============
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+
+# ============ ARQUIVOS TEMPORÁRIOS ============
+
+# Arquivos temporários gerais
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~.nib
+local.properties
+
+# QR Codes gerados
+backend/qr_codes/
+qr_codes/
+*.png
+!logo.png
+!public/**/*.png
+
+# Uploads
+uploads/
+backend/uploads/
+frontend/uploads/
+
+
+# ============ ESPECÍFICOS DO PROJETO ============
+
+# Arquivos de teste
+test_*.py
+*_test.py
+test_data/
+
+# Arquivos de configuração local
+local_settings.py
+config.local.js
+
+# Certificados SSL (se houver)
+*.pem
+*.key
+*.crt
+
+# Documentação gerada
+docs/_build/
+site/
+
+# Backups
+*.backup
+backup/
+
+
+# ============ OUTROS ============
+
+# Arquivos comprimidos
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Package-lock do npm (opcional - alguns times commitam)
+# frontend/package-lock.json
+
+# Yarn lock (opcional - alguns times commitam)
+# yarn.lock

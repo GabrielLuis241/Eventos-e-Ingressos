@@ -32,7 +32,8 @@ export default function EditarEvento() {
       data: form.data,
       horario: form.horario,
       local: form.local,
-      total_tickets: Number(form.ingressos_disponiveis || 0), // Backend espera total_tickets
+      total_tickets: Number(form.ingressos_disponiveis || form.total_tickets || 0),
+      price: Number(form.preco || form.price || 0),
     };
 
     try {
@@ -77,8 +78,18 @@ export default function EditarEvento() {
         <input
           type="number"
           name="ingressos_disponiveis"
-          value={form.ingressos_disponiveis || 0}
+          value={form.ingressos_disponiveis || form.available_tickets || 0}
           onChange={atualizar}
+        />
+
+        <label>Preço do Ingresso (R$) *</label>
+        <input
+          type="number"
+          name="preco"
+          value={form.preco || form.price || 0}
+          onChange={atualizar}
+          step="0.01"
+          min="0"
         />
 
         <label>Descrição</label>

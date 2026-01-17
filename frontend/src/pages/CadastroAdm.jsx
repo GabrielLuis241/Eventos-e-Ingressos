@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Cadastro.css";
-import { apiPost } from "../api";
+import { registrarUsuario } from "../api";
 
 export default function CadastroAdm() {
-  const [nome, setNome] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -12,50 +11,26 @@ export default function CadastroAdm() {
   const navigate = useNavigate();
 
   const handleCadastro = async (e) => {
-  e.preventDefault();
-  setErro("");
+    e.preventDefault();
+    setErro("");
 
-  try {
-    // chama API SEM usar o helper que injeta Authorization
-    const res = await fetch("http://localhost:8000/api/usuarios/registrar/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username,
-        password: senha,
-        email,
-        tipo: "organizador",
-        nome,
-      }),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Cadastro falhou (${res.status}): ${text}`);
+    try {
+      await registrarUsuario(username, email, senha, "organizador");
+      alert("Organizador cadastrado com sucesso!");
+      navigate("/login");
+    } catch (err) {
+      console.error(err);
+      setErro(
+        err.message || "Erro ao cadastrar organizador. Verifique os dados ou tente mais tarde."
+      );
     }
-
-    alert("Organizador cadastrado com sucesso!");
-    navigate("/login");
-  } catch (err) {
-    console.error(err);
-    setErro("Erro ao cadastrar organizador. Verifique os dados ou tente mais tarde.");
-  }
-};
-
+  };
 
   return (
     <div className="cadastro-container">
       <h2>Cadastro de Organizador</h2>
 
       <form onSubmit={handleCadastro}>
-        <input
-          type="text"
-          placeholder="Nome completo"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          required
-        />
-
         <input
           type="text"
           placeholder="Nome de usuário (login)"

@@ -1,19 +1,21 @@
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
+import bcrypt
 from app.models.user import User
 from app.schemas.user import UserCreate
 from fastapi import HTTPException
 
-# Configuração da criptografia
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def get_password_hash(password):
+def get_password_hash(password: str) -> str:
     """Transforma a password em texto limpo num hash seguro."""
-    return pwd_context.hash(password)
+    pwd_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(pwd_bytes, salt)
+    return hashed.decode('utf-8')
 
-def verify_password(plain_password, hashed_password):
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifica se a password digitada corresponde ao hash guardado."""
-    return pwd_context.verify(plain_password, hashed_password)
+    pwd_bytes = plain_password.encode('utf-8')
+    hashed_bytes = hashed_password.encode('utf-8')
+    return bcrypt.checkpw(pwd_bytes, hashed_bytes)
 
 def create_user(db: Session, user_data: UserCreate):
     # 1. Verificar se o email já está registado
@@ -33,7 +35,8 @@ def create_user(db: Session, user_data: UserCreate):
     new_user = User(
         username=user_data.username,
         email=user_data.email,
-        hashed_password=hashed_pwd
+        hashed_password=hashed_pwd,
+        user_type=user_data.user_type  # Agora inclui o tipo de usuário
     )
 
     db.add(new_user)

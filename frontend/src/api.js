@@ -84,6 +84,7 @@ function eventoParaBackend(evento) {
     location: evento.local || evento.location,
     image: evento.imagem || evento.image || "",
     total_tickets: evento.total_tickets || evento.ingressos_disponiveis || evento.ingressos_totais || 0,
+    price: evento.price || evento.preco || 0,
   };
   // Remove campos vazios que não são obrigatórios
   if (!payload.image) delete payload.image;
@@ -102,6 +103,9 @@ function eventoParaFrontend(evento) {
     imagem: evento.image || evento.imagem,
     ingressos_disponiveis: evento.available_tickets ?? evento.ingressos_disponiveis,
     total_tickets: evento.total_tickets,
+    preco: evento.price ?? evento.preco ?? 0,
+    price: evento.price ?? evento.preco ?? 0,
+    available_tickets: evento.available_tickets,
     categoria: evento.categoria || "outros", // Campo adicional do frontend
   };
 }
@@ -160,6 +164,76 @@ export async function confirmarPix(pagamento_id) {
   return apiPost("/pagamentos/pix/confirmar/", { pagamento_id });
 }
 
+// Autenticação - Register e Login
+export async function registrarUsuario(username, email, password, user_type = "cliente") {
+  const url = `${API_BASE}/auth/register`;
+  console.log("🔵 API POST Register:", url);
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, email, password, user_type }),
+  });
+  return handleResponse(res, "/auth/register", "POST");
+}
+
+export async function fazerLogin(username, password) {
+  const url = `${API_BASE}/auth/login`;
+  console.log("🔵 API POST Login:", url);
+  // OAuth2PasswordRequestForm espera form-data, não JSON
+  const formData = new URLSearchParams();
+  formData.append("username", username);
+  formData.append("password", password);
+  
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: formData,
+  });
+  const data = await handleResponse(res, "/auth/login", "POST");
+  
+  // O backend retorna: { access_token, token_type, user_type }
+  if (data && data.access_token) {
+    localStorage.setItem("accessToken", data.access_token);
+    localStorage.setItem("userType", data.user_type);
+    localStorage.setItem("usuarioLogado", JSON.stringify({
+      username: username,
+      user_type: data.user_type
+    }));
+  }
+  
+  return data;
+}
+
+// Compras/Purchases
+export async function iniciarCompra(event_id, quantity, payment_type) {
+  return apiPost("/compras/", { event_id, quantity, payment_type });
+}
+
+export async function confirmarCompra(purchase_id) {
+  return apiPost(`/compras/${purchase_id}/confirmar`, {});
+}
+
+// Relatórios
+export async function obterDashboardCompleto() {
+  return apiGet("/reports/dashboard-completo");
+}
+
+export async function exportarRelatorioCSV() {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`${API_BASE}/reports/exportar-csv`, {
+    headers: {
+      Authorization: token ? `Bearer ${token}` : "",
+    },
+  });
+  
+  if (!res.ok) {
+    throw new Error("Erro ao exportar relatório");
+  }
+  
+  // Retorna o blob para download
+  return res.blob();
+}
+
 const api = {
   apiGet,
   apiPost,
@@ -173,6 +247,10 @@ const api = {
   comprarIngresso,
   iniciarPix,
   confirmarPix,
+  registrarUsuario,
+  fazerLogin,
+  iniciarCompra,
+  confirmarCompra,
 };
 
 export default api;

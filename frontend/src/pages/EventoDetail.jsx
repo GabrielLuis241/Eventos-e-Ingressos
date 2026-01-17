@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { buscarEventoPorId } from '../api';
+import { buscarEventoPorId, iniciarCompra } from '../api';
 import './EventoDetail.css';
 
 export default function EventoDetail() {
@@ -10,7 +10,6 @@ export default function EventoDetail() {
   const [erro, setErro] = useState(null);
 
   const [quantidade, setQuantidade] = useState(1);
-  const [comprador, setComprador] = useState('');
   const [mensagem, setMensagem] = useState(null);
 
   const usuarioLogado = localStorage.getItem("usuarioLogado");
@@ -40,7 +39,7 @@ export default function EventoDetail() {
   if (erro) return <div className="error">Erro: {erro}</div>;
   if (!evento) return <div className="not-found">Evento não encontrado.</div>;
 
-  const handlePix = (e) => {
+  const handlePix = async (e) => {
     e.preventDefault();
     setMensagem(null);
 
@@ -53,12 +52,25 @@ export default function EventoDetail() {
       return;
     }
 
-    // aqui só faria a validação/simulação rápida
-    navigate("/pagamento/pix");
+    try {
+      const compra = await iniciarCompra(evento.id, quantidade, "pix");
+      // Redirecionar para página PIX com ID da compra
+      navigate(`/pagamento/pix/${compra.id}`, { state: { compra, evento } });
+    } catch (err) {
+      console.error(err);
+      setMensagem('Erro ao iniciar compra: ' + err.message);
+    }
   };
 
-  const handleCartao = () => {
-    navigate("/pagamento/cartao");
+  const handleCartao = async () => {
+    try {
+      const compra = await iniciarCompra(evento.id, quantidade, "cartao");
+      // Redirecionar para página Cartão com ID da compra
+      navigate(`/pagamento/cartao/${compra.id}`, { state: { compra, evento } });
+    } catch (err) {
+      console.error(err);
+      setMensagem('Erro ao iniciar compra: ' + err.message);
+    }
   };
 
   return (
@@ -110,17 +122,6 @@ export default function EventoDetail() {
                   value={quantidade}
                   onChange={e => setQuantidade(Number(e.target.value))}
                   className="input-quantidade"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Nome do comprador (opcional)</label>
-                <input
-                  type="text"
-                  value={comprador}
-                  onChange={e => setComprador(e.target.value)}
-                  placeholder="Nome para o ingresso"
-                  className="input-text"
                 />
               </div>
 

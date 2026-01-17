@@ -36,7 +36,9 @@ function App() {
           <Route path="/evento/:id/compra" element={<CompraIngresso />} />
 
           <Route path="/pagamento/cartao" element={<PagamentoCartao />} />
+          <Route path="/pagamento/cartao/:purchaseId" element={<PagamentoCartao />} />
           <Route path="/pagamento/pix" element={<PagamentoPix />} />
+          <Route path="/pagamento/pix/:purchaseId" element={<PagamentoPix />} />
 
           <Route path="/confirmacao" element={<ConfirmacaoCompra />} />
 

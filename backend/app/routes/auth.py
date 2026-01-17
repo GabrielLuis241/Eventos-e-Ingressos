@@ -42,5 +42,13 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    access_token = create_access_token(data={"sub": user.username, "id": user.id})
-    return {"access_token": access_token, "token_type": "bearer"}
+    access_token = create_access_token(data={
+        "sub": user.username, 
+        "id": user.id,
+        "user_type": user.user_type  # Incluir tipo no token
+    })
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "user_type": user.user_type  # Retornar tipo para o frontend
+    }

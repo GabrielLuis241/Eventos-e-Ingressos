@@ -26,47 +26,12 @@ export default function Home() {
   useEffect(() => {
     let mounted = true;
 
-    const dadosTeste = [
-      {
-        id: 1,
-        nome: "Show ao Vivo",
-        descricao: "Uma noite inesquecível com muita música e luzes.",
-        data: "2025-06-13",
-        horario: "20:00",
-        local: "Arena Central",
-        categoria: "show",
-        imagem:
-          "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=900&q=80",
-      },
-      {
-        id: 2,
-        nome: "Peça de Teatro",
-        descricao: "Espetáculo emocionante com elenco premiado.",
-        data: "2025-06-20",
-        horario: "19:30",
-        local: "Teatro Municipal",
-        categoria: "teatro",
-        imagem:
-          "https://images.unsplash.com/photo-1515165562835-c4c9e0737eaa?auto=format&fit=crop&w=900&q=80",
-      },
-      {
-        id: 3,
-        nome: "Palestra de Tecnologia",
-        descricao: "Especialistas falando sobre inovação e futuro digital.",
-        data: "2025-07-05",
-        horario: "09:00",
-        local: "Centro de Convenções",
-        categoria: "palestra",
-        imagem:
-          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80",
-      },
-    ];
-
     listarEventos()
       .then((data) => {
         if (!mounted) return;
+        // Remove dados de teste - mostra apenas eventos cadastrados
         if (!data || data.length === 0) {
-          setEventos(dadosTeste);
+          setEventos([]);
         } else {
           setEventos(
             data.map((ev) => ({
@@ -80,7 +45,7 @@ export default function Home() {
       .catch((err) => {
         console.error("Erro ao carregar eventos:", err);
         if (!mounted) return;
-        setEventos(dadosTeste);
+        setEventos([]);
         setLoading(false);
       });
 
@@ -150,7 +115,7 @@ export default function Home() {
               <>
                 <span className="user-greeting">Olá, {usuario.username}</span>
                 <div className="nav-buttons">
-                  {usuario.tipo === "organizador" ? (
+                  {usuario.user_type === "organizador" ? (
                     <>
                       <Link to="/admin/eventos" className="nav-btn">Gerenciar Eventos</Link>
                       <Link to="/relatorios" className="nav-btn">Relatórios</Link>
@@ -235,23 +200,34 @@ export default function Home() {
       {/* EVENTOS */}
       <section className="events-section">
         <h2 className="section-title">Eventos</h2>
-        <div className="events-grid">
-          {eventosFiltrados.map((evento) => (
-            <div key={evento.id} className="event-card">
-              <img src={evento.imagem} alt={evento.nome} className="event-image" />
-              <div className="event-details">
-                <h3 className="event-title">{evento.nome}</h3>
-                <p className="event-meta">{evento.data} às {evento.horario}</p>
-                <div className="location-pin">
-                  <span>📍</span> {evento.local}
+        {eventosFiltrados.length === 0 ? (
+          <div className="no-events">
+            <p>📅 Nenhum evento cadastrado ainda.</p>
+            {usuario?.user_type === "organizador" && (
+              <Link to="/admin/eventos" className="create-event-btn">
+                Criar Primeiro Evento
+              </Link>
+            )}
+          </div>
+        ) : (
+          <div className="events-grid">
+            {eventosFiltrados.map((evento) => (
+              <div key={evento.id} className="event-card">
+                <img src={evento.imagem || 'https://via.placeholder.com/400x300?text=Evento'} alt={evento.nome} className="event-image" />
+                <div className="event-details">
+                  <h3 className="event-title">{evento.nome}</h3>
+                  <p className="event-meta">{evento.data} às {evento.horario}</p>
+                  <div className="location-pin">
+                    <span>📍</span> {evento.local}
+                  </div>
+                  <Link to={`/evento/${evento.id}`} className="event-btn">
+                    Ver Detalhes
+                  </Link>
                 </div>
-                <Link to={`/evento/${evento.id}`} className="event-btn">
-                  Ver Detalhes
-                </Link>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
