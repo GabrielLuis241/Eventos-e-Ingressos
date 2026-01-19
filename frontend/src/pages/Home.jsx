@@ -10,6 +10,7 @@ export default function Home() {
   const [categoriaAtiva, setCategoriaAtiva] = useState("todos");
   const [usuario, setUsuario] = useState(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [busca, setBusca] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,9 +80,23 @@ export default function Home() {
   };
 
   const eventosFiltrados = useMemo(() => {
-    if (categoriaAtiva === "todos") return eventos;
-    return eventos.filter((e) => e.categoria === categoriaAtiva);
-  }, [eventos, categoriaAtiva]);
+    let lista = eventos;
+
+    if (categoriaAtiva !== "todos") {
+      lista = lista.filter((e) => e.categoria === categoriaAtiva);
+    }
+
+    if (busca.trim()) {
+      const termo = busca.toLowerCase();
+      lista = lista.filter(
+        (e) =>
+          e.nome.toLowerCase().includes(termo) ||
+          e.local.toLowerCase().includes(termo)
+      );
+    }
+
+    return lista;
+  }, [eventos, categoriaAtiva, busca]);
 
   const destaques = eventos.slice(0, 5);
 
@@ -102,11 +117,20 @@ export default function Home() {
         <div className="header-content">
           <div className="logo-section">
             <h1>EVENTOS+</h1>
-            <p>Encontre e compre<br />ingressos para eventos</p>
+            <p>
+              Encontre e compre
+              <br />
+              ingressos para eventos
+            </p>
 
             <div className="search-bar">
               <span className="search-icon">🔍</span>
-              <input type="text" placeholder="Buscar eventos..." />
+              <input
+                type="text"
+                placeholder="Buscar eventos..."
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+              />
             </div>
           </div>
 
@@ -117,17 +141,27 @@ export default function Home() {
                 <div className="nav-buttons">
                   {usuario.user_type === "organizador" ? (
                     <>
-                      <Link to="/admin/eventos" className="nav-btn">Gerenciar Eventos</Link>
-                      <Link to="/relatorios" className="nav-btn">Relatórios</Link>
+                      <Link to="/admin/eventos" className="nav-btn">
+                        Gerenciar Eventos
+                      </Link>
+                      <Link to="/relatorios" className="nav-btn">
+                        Relatórios
+                      </Link>
                     </>
                   ) : (
-                    <Link to="/perfil" className="nav-btn">Meu Perfil</Link>
+                    <Link to="/perfil" className="nav-btn">
+                      Meu Perfil
+                    </Link>
                   )}
-                  <button onClick={handleLogout} className="nav-btn logout-btn">Sair</button>
+                  <button onClick={handleLogout} className="nav-btn logout-btn">
+                    Sair
+                  </button>
                 </div>
               </>
             ) : (
-              <Link to="/login" className="login-btn">Entrar</Link>
+              <Link to="/login" className="login-btn">
+                Entrar
+              </Link>
             )}
           </div>
         </div>
@@ -138,7 +172,10 @@ export default function Home() {
         <div className="hero-grid">
           {destaques[carouselIndex] && (
             <div className="hero-card">
-              <img src={destaques[carouselIndex].imagem} alt={destaques[carouselIndex].nome} />
+              <img
+                src={destaques[carouselIndex].imagem}
+                alt={destaques[carouselIndex].nome}
+              />
               <div className="hero-overlay">
                 <h3>{destaques[carouselIndex].nome}</h3>
                 <p>{destaques[carouselIndex].data}</p>
@@ -147,17 +184,28 @@ export default function Home() {
           )}
           {destaques[(carouselIndex + 1) % destaques.length] && (
             <div className="hero-card center">
-              <img src={destaques[(carouselIndex + 1) % destaques.length].imagem} alt={destaques[(carouselIndex + 1) % destaques.length].nome} />
+              <img
+                src={destaques[(carouselIndex + 1) % destaques.length].imagem}
+                alt={destaques[(carouselIndex + 1) % destaques.length].nome}
+              />
               <div className="hero-overlay">
                 <h3>{destaques[(carouselIndex + 1) % destaques.length].nome}</h3>
-                <p>{destaques[(carouselIndex + 1) % destaques.length].data} • {destaques[(carouselIndex + 1) % destaques.length].horario}</p>
-                <p className="hero-local">📍 {destaques[(carouselIndex + 1) % destaques.length].local}</p>
+                <p>
+                  {destaques[(carouselIndex + 1) % destaques.length].data} •{" "}
+                  {destaques[(carouselIndex + 1) % destaques.length].horario}
+                </p>
+                <p className="hero-local">
+                  📍 {destaques[(carouselIndex + 1) % destaques.length].local}
+                </p>
               </div>
             </div>
           )}
           {destaques[(carouselIndex + 2) % destaques.length] && (
             <div className="hero-card">
-              <img src={destaques[(carouselIndex + 2) % destaques.length].imagem} alt={destaques[(carouselIndex + 2) % destaques.length].nome} />
+              <img
+                src={destaques[(carouselIndex + 2) % destaques.length].imagem}
+                alt={destaques[(carouselIndex + 2) % destaques.length].nome}
+              />
               <div className="hero-overlay">
                 <h3>{destaques[(carouselIndex + 2) % destaques.length].nome}</h3>
                 <p>{destaques[(carouselIndex + 2) % destaques.length].data}</p>
@@ -171,7 +219,7 @@ export default function Home() {
           {destaques.map((_, idx) => (
             <span
               key={idx}
-              className={`dot ${idx === carouselIndex ? 'active' : ''}`}
+              className={`dot ${idx === carouselIndex ? "active" : ""}`}
               onClick={() => setCarouselIndex(idx)}
             />
           ))}
@@ -185,12 +233,14 @@ export default function Home() {
           {categorias.map((cat) => (
             <div
               key={cat}
-              className={`category-card ${categoriaAtiva === cat ? 'active' : ''}`}
+              className={`category-card ${categoriaAtiva === cat ? "active" : ""}`}
               onClick={() => setCategoriaAtiva(cat)}
             >
               <div className="cat-icon-emoji">{getCategoriaEmoji(cat)}</div>
               <span className="cat-name">
-                {cat === 'todos' ? 'Todos' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                {cat === "todos"
+                  ? "Todos"
+                  : cat.charAt(0).toUpperCase() + cat.slice(1)}
               </span>
             </div>
           ))}
@@ -213,10 +263,19 @@ export default function Home() {
           <div className="events-grid">
             {eventosFiltrados.map((evento) => (
               <div key={evento.id} className="event-card">
-                <img src={evento.imagem || 'https://via.placeholder.com/400x300?text=Evento'} alt={evento.nome} className="event-image" />
+                <img
+                  src={
+                    evento.imagem ||
+                    "https://via.placeholder.com/400x300?text=Evento"
+                  }
+                  alt={evento.nome}
+                  className="event-image"
+                />
                 <div className="event-details">
                   <h3 className="event-title">{evento.nome}</h3>
-                  <p className="event-meta">{evento.data} às {evento.horario}</p>
+                  <p className="event-meta">
+                    {evento.data} às {evento.horario}
+                  </p>
                   <div className="location-pin">
                     <span>📍</span> {evento.local}
                   </div>

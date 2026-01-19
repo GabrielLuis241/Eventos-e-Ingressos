@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Relatorios.css";
-import { obterDashboardCompleto, exportarRelatorioCSV } from "../api";
+import { obterDashboardCompleto, exportarRelatorioCSV, exportarRelatorioPDF } from "../api";
 
 export default function Relatorios() {
   const [usuario, setUsuario] = useState(null);
@@ -72,6 +72,23 @@ export default function Relatorios() {
     }
   };
 
+  const handleExportarPDF = async () => {
+    try {
+      const blob = await exportarRelatorioPDF();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `relatorio_vendas_${new Date().toISOString().split("T")[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Erro ao exportar PDF:", error);
+      alert("Erro ao exportar relatório em PDF. Tente novamente.");
+    }
+  };
+
   function handleLogout() {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
@@ -118,6 +135,9 @@ export default function Relatorios() {
             <span className="user-name">Olá, {usuario.username}</span>
             <button onClick={handleExportarCSV} className="btn btn-success btn-sm">
               📥 Exportar CSV
+            </button>
+            <button onClick={handleExportarPDF} className="btn btn-primary btn-sm">
+              📄 Exportar PDF
             </button>
             <Link to="/admin/eventos" className="btn btn-outline btn-sm">
               Gerenciar Eventos
