@@ -20,8 +20,9 @@ async function handleResponse(res, path, method) {
   return res.json();
 }
 
+// ========================
 // Helpers base com JWT
-
+// ========================
 export async function apiGet(path) {
   const token = localStorage.getItem("accessToken");
   const url = `${API_BASE}${path}`;
