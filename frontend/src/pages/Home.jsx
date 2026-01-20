@@ -129,10 +129,7 @@ export default function Home() {
                 type="text"
                 placeholder="Buscar eventos..."
                 value={busca}
-                onChange={(e) => {
-                  setBusca(e.target.value);
-                  setCategoriaAtiva("todos");
-                }}
+                onChange={(e) => setBusca(e.target.value)}
               />
             </div>
           </div>
