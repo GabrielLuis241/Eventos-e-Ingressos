@@ -2,13 +2,21 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Relatorios.css";
-import { obterDashboardCompleto, exportarRelatorioCSV } from "../api";
+import {
+  obterDashboardCompleto,
+  exportarRelatorioCSV,
+  exportarRelatorioPDF,
+} from "../api";
 
 export default function Relatorios() {
   const [usuario, setUsuario] = useState(null);
   const [relatorios, setRelatorios] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+
+  // filtro
+  const [eventoSelecionado, setEventoSelecionado] = useState("todos");
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,10 +39,8 @@ export default function Relatorios() {
       return;
     }
 
-    // Buscar dados reais do backend
     buscarRelatorios();
 
-    // Atualização automática a cada 30 segundos
     const intervalId = setInterval(() => {
       buscarRelatorios();
     }, 30000);
@@ -61,7 +67,9 @@ export default function Relatorios() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `relatorio_vendas_${new Date().toISOString().split("T")[0]}.csv`;
+      a.download = `relatorio_vendas_${new Date()
+        .toISOString()
+        .split("T")[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -69,6 +77,25 @@ export default function Relatorios() {
     } catch (error) {
       console.error("Erro ao exportar CSV:", error);
       alert("Erro ao exportar relatório. Tente novamente.");
+    }
+  };
+
+  const handleExportarPDF = async () => {
+    try {
+      const blob = await exportarRelatorioPDF();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `relatorio_vendas_${new Date()
+        .toISOString()
+        .split("T")[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Erro ao exportar PDF:", error);
+      alert("Erro ao exportar relatório em PDF. Tente novamente.");
     }
   };
 
@@ -104,20 +131,39 @@ export default function Relatorios() {
     return <div className="loading">Carregando...</div>;
   }
 
+  // lista filtrada
+  const vendasFiltradas =
+    eventoSelecionado === "todos"
+      ? relatorios.vendasPorEvento
+      : relatorios.vendasPorEvento.filter(
+          (e) => e.id.toString() === eventoSelecionado
+        );
+
   return (
     <div className="relatorios-page">
       {/* Header */}
       <header className="relatorios-header">
         <div className="header-content">
           <div className="header-left">
-            <Link to="/" className="back-button">← Voltar</Link>
+            <Link to="/" className="back-button">
+              ← Voltar
+            </Link>
             <h1>📊 Relatórios</h1>
             <p className="subtitle">Painel de controle e análises</p>
           </div>
           <div className="header-right">
             <span className="user-name">Olá, {usuario.username}</span>
-            <button onClick={handleExportarCSV} className="btn btn-success btn-sm">
+            <button
+              onClick={handleExportarCSV}
+              className="btn btn-success btn-sm"
+            >
               📥 Exportar CSV
+            </button>
+            <button
+              onClick={handleExportarPDF}
+              className="btn btn-primary btn-sm"
+            >
+              📄 Exportar PDF
             </button>
             <Link to="/admin/eventos" className="btn btn-outline btn-sm">
               Gerenciar Eventos
@@ -140,7 +186,10 @@ export default function Relatorios() {
             <div className="metric-content">
               <h3>Total de Vendas</h3>
               <p className="metric-value">
-                R$ {relatorios.totalVendas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                R${" "}
+                {relatorios.totalVendas.toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                })}
               </p>
             </div>
           </div>
@@ -167,8 +216,27 @@ export default function Relatorios() {
           <div className="section-header">
             <h2>📈 Faturamento por Evento</h2>
           </div>
+
+          {/* ✅ FILTRO (item 15) */}
+          <div style={{ marginBottom: "10px" }}>
+            <label>
+              Filtrar por evento:{" "}
+              <select
+                value={eventoSelecionado}
+                onChange={(e) => setEventoSelecionado(e.target.value)}
+              >
+                <option value="todos">Todos</option>
+                {relatorios.vendasPorEvento.map((evento) => (
+                  <option key={evento.id} value={evento.id}>
+                    {evento.nomeEvento}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
           <div className="table-wrapper">
-            {relatorios.vendasPorEvento.length === 0 ? (
+            {vendasFiltradas.length === 0 ? (
               <div className="no-data">
                 <p>📭 Nenhuma venda registrada ainda.</p>
                 <p>Quando houver vendas, os dados aparecerão aqui.</p>
@@ -184,26 +252,38 @@ export default function Relatorios() {
                   </tr>
                 </thead>
                 <tbody>
-                  {relatorios.vendasPorEvento.map((evento) => (
+                  {vendasFiltradas.map((evento) => (
                     <tr key={evento.id}>
                       <td className="event-name">{evento.nomeEvento}</td>
-                      <td>{new Date(evento.data).toLocaleDateString('pt-BR')}</td>
-                      <td className="text-center">{evento.ingressosVendidos}</td>
+                      <td>
+                        {new Date(evento.data).toLocaleDateString("pt-BR")}
+                      </td>
+                      <td className="text-center">
+                        {evento.ingressosVendidos}
+                      </td>
                       <td className="value">
-                        R$ {evento.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R${" "}
+                        {evento.valorTotal.toLocaleString("pt-BR", {
+                          minimumFractionDigits: 2,
+                        })}
                       </td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr className="total-row">
-                    <td colSpan="2"><strong>Total</strong></td>
+                    <td colSpan="2">
+                      <strong>Total</strong>
+                    </td>
                     <td className="text-center">
                       <strong>{relatorios.totalIngressos}</strong>
                     </td>
                     <td className="value">
                       <strong>
-                        R$ {relatorios.totalVendas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R${" "}
+                        {relatorios.totalVendas.toLocaleString("pt-BR", {
+                          minimumFractionDigits: 2,
+                        })}
                       </strong>
                     </td>
                   </tr>
@@ -244,9 +324,16 @@ export default function Relatorios() {
                       <td>{cliente.evento}</td>
                       <td className="text-center">{cliente.quantidade}</td>
                       <td className="value">
-                        R$ {cliente.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R${" "}
+                        {cliente.valorTotal.toLocaleString("pt-BR", {
+                          minimumFractionDigits: 2,
+                        })}
                       </td>
-                      <td>{new Date(cliente.dataCompra).toLocaleDateString('pt-BR')}</td>
+                      <td>
+                        {new Date(cliente.dataCompra).toLocaleDateString(
+                          "pt-BR"
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
