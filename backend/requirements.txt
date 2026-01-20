@@ -4,3 +4,7 @@ sqlalchemy
 python-dotenv
 qrcode
 pillow
+python-jose[cryptography]
+email-validator
+bcrypt
+python-multipart
