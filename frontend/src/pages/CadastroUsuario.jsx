@@ -29,6 +29,7 @@ export default function CadastroUsuario() {
 
   return (
     <div className="cadastro-container">
+      <Link to="/" className="btn-voltar-top">← Voltar</Link>
       <h2>Cadastro de Usuário</h2>
 
       <form onSubmit={handleCadastro}>

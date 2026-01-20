@@ -16,8 +16,8 @@ export default function CadastroAdm() {
 
     try {
       await registrarUsuario(username, email, senha, "organizador");
-      alert("Organizador cadastrado com sucesso!");
-      navigate("/login");
+      alert(`✅ Administrador cadastrado com sucesso!\n\n👤 Usuário: ${username}\n📧 Email: ${email}\n\nCompartilhe essas credenciais com o novo admin!`);
+      navigate("/admin/eventos");
     } catch (err) {
       console.error(err);
       setErro(
@@ -28,6 +28,7 @@ export default function CadastroAdm() {
 
   return (
     <div className="cadastro-container">
+      <Link to="/admin/eventos" className="btn-voltar-top">← Voltar</Link>
       <h2>Cadastro de Organizador</h2>
 
       <form onSubmit={handleCadastro}>
@@ -60,8 +61,8 @@ export default function CadastroAdm() {
 
       {erro && <p className="erro">{erro}</p>}
 
-      <Link to="/login" className="voltar-link">
-        Voltar ao Login
+      <Link to="/admin/eventos" className="voltar-link">
+        ← Voltar para Gerenciar Eventos
       </Link>
     </div>
   );

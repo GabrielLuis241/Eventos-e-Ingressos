@@ -91,6 +91,7 @@ export default function GerenciarEventos() {
           </div>
           <div className="header-actions">
             <Link to="/" className="btn-voltar">← Home</Link>
+            <Link to="/cadastro/admin" className="btn-novo-admin">👨‍💼 Novo Admin</Link>
             <Link to="/relatorios" className="btn-relatorios">📊 Relatórios</Link>
           </div>
         </div>

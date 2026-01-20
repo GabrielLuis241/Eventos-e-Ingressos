@@ -40,6 +40,7 @@
 }
 
 .btn-voltar,
+.btn-novo-admin,
 .btn-relatorios {
   padding: 10px 20px;
   border-radius: 999px;
@@ -56,6 +57,18 @@
 
 .btn-voltar:hover {
   background: #d0d0d0;
+}
+
+.btn-novo-admin {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.btn-novo-admin:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .btn-relatorios {

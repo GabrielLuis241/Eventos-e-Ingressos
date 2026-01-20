@@ -28,6 +28,7 @@ export default function Login() {
 
   return (
     <div className="login-container">
+      <Link to="/" className="btn-voltar-top">← Voltar</Link>
       <h2>Login</h2>
 
       <form onSubmit={handleLogin}>
@@ -55,7 +56,6 @@ export default function Login() {
           Não tem conta? <Link to="/cadastro/usuario">Cadastre-se</Link>
         </p>
         <p>
-          Organizador? <Link to="/cadastro/admin">Criar conta</Link>
         </p>
       </div>
     </div>
