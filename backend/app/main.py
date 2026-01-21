@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
-from app.routes import public_events, purchases, tickets, admin_events, reports, auth # Importado auth
+# IMPORTANTE: Importe o models aqui para o Base conhecer as tabelas
+from app import models 
+from app.routes import public_events, purchases, tickets, admin_events, reports, auth
 
-# Cria as tabelas no banco de dados (incluindo a nova tabela de usuários)
+# Agora o Base.metadata terá as definições do models.py carregadas
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="MVP Eventos")
