@@ -11,6 +11,10 @@ export default function Home() {
   const [usuario, setUsuario] = useState(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [busca, setBusca] = useState("");
+  const [buscaEventos, setBuscaEventos] = useState("");
+  const [precoMin, setPrecoMin] = useState("");
+  const [precoMax, setPrecoMax] = useState("");
+  const [localFiltro, setLocalFiltro] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,6 +83,12 @@ export default function Home() {
     return "📅";
   };
 
+  // Extrair locais únicos para o dropdown
+  const locaisUnicos = useMemo(() => {
+    const locais = eventos.map((e) => e.local || e.location || "").filter(Boolean);
+    return [...new Set(locais)];
+  }, [eventos]);
+
   const eventosFiltrados = useMemo(() => {
     let lista = eventos;
 
@@ -86,17 +96,58 @@ export default function Home() {
       lista = lista.filter((e) => e.categoria === categoriaAtiva);
     }
 
+    // Busca do header
     if (busca.trim()) {
       const termo = busca.toLowerCase();
-      lista = lista.filter(
-        (e) =>
-          e.nome.toLowerCase().includes(termo) ||
-          e.local.toLowerCase().includes(termo)
-      );
+      lista = lista.filter((e) => {
+        const nome = (e.nome || e.name || "").toLowerCase();
+        const local = (e.local || e.location || "").toLowerCase();
+        return nome.includes(termo) || local.includes(termo);
+      });
+    }
+
+    // Busca da seção de eventos
+    if (buscaEventos.trim()) {
+      const termo = buscaEventos.toLowerCase();
+      lista = lista.filter((e) => {
+        const nome = (e.nome || e.name || "").toLowerCase();
+        const local = (e.local || e.location || "").toLowerCase();
+        return nome.includes(termo) || local.includes(termo);
+      });
+    }
+
+    // Filtro de preço mínimo
+    if (precoMin !== "") {
+      const min = parseFloat(precoMin);
+      if (!isNaN(min)) {
+        lista = lista.filter((e) => {
+          const preco = e.preco || e.price || 0;
+          return preco >= min;
+        });
+      }
+    }
+
+    // Filtro de preço máximo
+    if (precoMax !== "") {
+      const max = parseFloat(precoMax);
+      if (!isNaN(max)) {
+        lista = lista.filter((e) => {
+          const preco = e.preco || e.price || 0;
+          return preco <= max;
+        });
+      }
+    }
+
+    // Filtro de local
+    if (localFiltro) {
+      lista = lista.filter((e) => {
+        const local = e.local || e.location || "";
+        return local === localFiltro;
+      });
     }
 
     return lista;
-  }, [eventos, categoriaAtiva, busca]);
+  }, [eventos, categoriaAtiva, busca, buscaEventos, precoMin, precoMax, localFiltro]);
 
   const destaques = eventos.slice(0, 5);
 
@@ -250,6 +301,71 @@ export default function Home() {
       {/* EVENTOS */}
       <section className="events-section">
         <h2 className="section-title">Eventos</h2>
+
+        {/* BARRA DE FILTROS */}
+        <div className="events-filter-bar">
+          <div className="filter-search">
+            <span className="filter-search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="Buscar por nome ou local..."
+              value={buscaEventos}
+              onChange={(e) => setBuscaEventos(e.target.value)}
+            />
+          </div>
+
+          <div className="filter-group">
+            <label>💰 Preço:</label>
+            <input
+              type="number"
+              placeholder="Mín"
+              value={precoMin}
+              onChange={(e) => setPrecoMin(e.target.value)}
+              min="0"
+              className="filter-price-input"
+            />
+            <span className="filter-separator">-</span>
+            <input
+              type="number"
+              placeholder="Máx"
+              value={precoMax}
+              onChange={(e) => setPrecoMax(e.target.value)}
+              min="0"
+              className="filter-price-input"
+            />
+          </div>
+
+          <div className="filter-group">
+            <label>📍 Local:</label>
+            <select
+              value={localFiltro}
+              onChange={(e) => setLocalFiltro(e.target.value)}
+              className="filter-select"
+            >
+              <option value="">Todos os locais</option>
+              {locaisUnicos.map((local, idx) => (
+                <option key={idx} value={local}>
+                  {local}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {(buscaEventos || precoMin || precoMax || localFiltro) && (
+            <button
+              className="filter-clear-btn"
+              onClick={() => {
+                setBuscaEventos("");
+                setPrecoMin("");
+                setPrecoMax("");
+                setLocalFiltro("");
+              }}
+            >
+              ✕ Limpar filtros
+            </button>
+          )}
+        </div>
+
         {eventosFiltrados.length === 0 ? (
           <div className="no-events">
             <p>📅 Nenhum evento cadastrado ainda.</p>
