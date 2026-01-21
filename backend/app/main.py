@@ -1,14 +1,25 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles  # NOVO: Necessário para servir imagens
+import os
+
 from app.database import Base, engine
-# IMPORTANTE: Importe o models aqui para o Base conhecer as tabelas
 from app import models 
 from app.routes import public_events, purchases, tickets, admin_events, reports, auth
 
-# Agora o Base.metadata terá as definições do models.py carregadas
+# Cria as tabelas no banco de dados
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="MVP Eventos")
+
+# --- CONFIGURAÇÃO DE ARQUIVOS ESTÁTICOS ---
+# Cria a pasta static/uploads se ela não existir para evitar erros
+if not os.path.exists("static/uploads"):
+    os.makedirs("static/uploads")
+
+# Monta a pasta para que as imagens sejam acessíveis via URL (ex: http://localhost:8000/static/uploads/foto.jpg)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+# ------------------------------------------
 
 # Configurar CORS
 app.add_middleware(
@@ -20,7 +31,7 @@ app.add_middleware(
 )
 
 # Registro das rotas
-app.include_router(auth.router) # Rota de Login e Registro adicionada
+app.include_router(auth.router)
 app.include_router(public_events.router)
 app.include_router(purchases.router)
 app.include_router(tickets.router)

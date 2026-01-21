@@ -6,15 +6,18 @@ import datetime
 class Purchase(Base):
     __tablename__ = "purchases"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
     event_id = Column(Integer, ForeignKey("events.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
-    quantity = Column(Integer) # Quantidade de ingressos comprados
-    total_value = Column(Float) # US03: Preço do evento * quantidade
-    payment_type = Column(String) # US04/05: 'cartao' ou 'pix'
+    quantity = Column(Integer)
+    total_value = Column(Float)
+    payment_type = Column(String)
     status = Column(String, default="pendente") # pendente, pago, cancelado
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
-    # Criar a relação inversa
+    # Relacionamentos
     user = relationship("User", back_populates="purchases")
     event = relationship("Event")
+    
+    # CORREÇÃO: Esta linha permite que o Ticket aponte para cá via back_populates
+    tickets = relationship("Ticket", back_populates="purchase", cascade="all, delete-orphan")

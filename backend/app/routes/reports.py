@@ -1,16 +1,18 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Response, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func
-from fastapi.responses import StreamingResponse
+from sqlalchemy import func, and_
+from datetime import datetime, timedelta
+from typing import Optional, List
 import io
 import csv
+from fpdf import FPDF
 from app.database import SessionLocal
 from app.models.purchase import Purchase
 from app.models.ticket import Ticket
 from app.models.event import Event
 from app.models.user import User
 
-router = APIRouter(prefix="/reports", tags=["Relatórios"])
+router = APIRouter(prefix="/reports", tags=["Relatórios Avançados"])
 
 def get_db():
     db = SessionLocal()
@@ -19,148 +21,140 @@ def get_db():
     finally:
         db.close()
 
-# --- US11: Relatórios Básicos (O que você já tinha) ---
+# --- Classe PDF Customizada ---
+class PDFReport(FPDF):
+    def header(self):
+        self.set_font("Arial", "B", 16)
+        self.cell(0, 10, "Relatorio de Performance de Eventos", border=False, ln=True, align="C")
+        self.set_font("Arial", "I", 8)
+        self.cell(0, 5, f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ln=True, align="C")
+        self.ln(10)
 
-@router.get("/vendas-gerais")
-def obter_relatorio_geral(db: Session = Depends(get_db)):
-    total_arrecadado = db.query(func.sum(Purchase.total_value)).filter(Purchase.status == "pago").scalar() or 0.0
-    total_ingressos_vendidos = db.query(func.count(Ticket.id)).scalar() or 0
+    def footer(self):
+        self.set_y(-15)
+        self.set_font("Arial", "I", 8)
+        self.cell(0, 10, f"Pagina {self.page_no()}", align="C")
+
+# --- Utilitário para Filtro de Tempo ---
+def filtrar_por_periodo(query, model_attr, periodo: str):
+    hoje = datetime.utcnow()
+    if periodo == "7d":
+        return query.filter(model_attr >= hoje - timedelta(days=7))
+    elif periodo == "30d":
+        return query.filter(model_attr >= hoje - timedelta(days=30))
+    return query
+
+# --- 1. DASHBOARD E GRÁFICOS (US15) ---
+
+@router.get("/performance-graficos")
+def obter_dados_graficos(
+    event_id: Optional[int] = None, 
+    periodo: str = Query("30d", enum=["7d", "30d", "all"]),
+    db: Session = Depends(get_db)
+):
+    """ Retorna rendimento diário e volume para gráficos de linha/barra """
+    query = db.query(
+        func.date(Purchase.created_at).label("data"),
+        func.sum(Purchase.total_value).label("ganhos"),
+        func.count(Purchase.id).label("vendas_qtd")
+    ).filter(Purchase.status == "pago")
+
+    if event_id:
+        query = query.filter(Purchase.event_id == event_id)
+    
+    query = filtrar_por_periodo(query, Purchase.created_at, periodo)
+    resultados = query.group_by(func.date(Purchase.created_at)).order_by("data").all()
+
+    return [{"data": str(r.data), "ganhos": float(r.ganhos), "vendas": r.vendas_qtd} for r in resultados]
+
+@router.get("/analise-lucro-perda/{event_id}")
+def analise_detalhada_evento(event_id: int, db: Session = Depends(get_db)):
+    """ US11: Analisa ocupação e perda financeira por ingressos não vendidos """
+    evento = db.query(Event).filter(Event.id == event_id).first()
+    if not evento:
+        raise HTTPException(404, "Evento não encontrado")
+
+    vendidos = db.query(func.count(Ticket.id)).filter(Ticket.event_id == event_id).scalar() or 0
+    arrecadado = db.query(func.sum(Purchase.total_value)).filter(
+        Purchase.event_id == event_id, Purchase.status == "pago"
+    ).scalar() or 0.0
+    
+    vagas_restantes = max(0, evento.capacidade - vendidos)
+    perda_potencial = vagas_restantes * evento.preco
 
     return {
-        "total_arrecadado": total_arrecadado,
-        "total_ingressos_vendidos": total_ingressos_vendidos
+        "evento": evento.name,
+        "taxa_ocupacao": f"{(vendidos / evento.capacidade) * 100:.2f}%",
+        "ganho_real": float(arrecadado),
+        "perda_vagas_vazias": float(perda_potencial),
+        "ingressos_totais": evento.capacidade,
+        "ingressos_vendidos": vendidos
     }
+
+# --- 2. EXPORTAÇÃO DINÂMICA (PDF & CSV) ---
+
+@router.get("/exportar-pdf-avancado")
+def exportar_pdf_custom(
+    event_id: Optional[int] = None,
+    periodo: str = Query("all", enum=["7d", "30d", "all"]),
+    db: Session = Depends(get_db)
+):
+    """ Gera PDF filtrado por tempo ou evento específico """
+    query = db.query(Purchase).filter(Purchase.status == "pago")
+    
+    titulo_relatorio = "Relatorio Geral de Vendas"
+    if event_id:
+        evento = db.query(Event).filter(Event.id == event_id).first()
+        query = query.filter(Purchase.event_id == event_id)
+        titulo_relatorio = f"Vendas: {evento.name}"
+    
+    query = filtrar_por_periodo(query, Purchase.created_at, periodo)
+    vendas = query.order_by(Purchase.created_at.desc()).all()
+
+    pdf = PDFReport()
+    pdf.add_page()
+    
+    # Cabeçalho da Tabela
+    pdf.set_font("Arial", "B", 10)
+    pdf.set_fill_color(220, 230, 241)
+    pdf.cell(35, 10, "Data", 1, 0, "C", True)
+    pdf.cell(75, 10, "Comprador", 1, 0, "C", True)
+    pdf.cell(30, 10, "Qtd", 1, 0, "C", True)
+    pdf.cell(50, 10, "Valor Total", 1, 1, "C", True)
+
+    pdf.set_font("Arial", "", 10)
+    total_acumulado = 0
+    for v in vendas:
+        nome = v.user.username if v.user else "N/A"
+        pdf.cell(35, 10, v.created_at.strftime("%d/%m/%Y"), 1)
+        pdf.cell(75, 10, nome[:30], 1)
+        pdf.cell(30, 10, str(v.quantity), 1, 0, "C")
+        pdf.cell(50, 10, f"R$ {v.total_value:.2f}", 1, 1, "R")
+        total_acumulado += v.total_value
+
+    pdf.ln(5)
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 10, f"RECEITA TOTAL DO PERIODO: R$ {total_acumulado:.2f}", align="R")
+
+    return Response(
+        content=pdf.output(),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=relatorio_{periodo}.pdf"}
+    )
 
 @router.get("/dashboard-completo")
 def obter_dashboard_completo(db: Session = Depends(get_db)):
-    """
-    Retorna todos os dados necessários para o dashboard de relatórios.
-    Inclui: métricas gerais, vendas por evento e lista de clientes que compraram.
-    """
-    # 1. Métricas gerais
+    """ Mantido e otimizado para métricas rápidas """
     total_vendas = db.query(func.sum(Purchase.total_value)).filter(Purchase.status == "pago").scalar() or 0.0
     total_ingressos = db.query(func.count(Ticket.id)).scalar() or 0
-    total_eventos = db.query(func.count(Event.id)).scalar() or 0
     
-    # 2. Vendas por evento (com JOIN para pegar nome do evento)
-    vendas_por_evento = db.query(
-        Event.id,
-        Event.name,
-        Event.date,
-        func.count(Ticket.id).label("ingressos_vendidos"),
-        func.sum(Purchase.total_value).label("valor_total")
-    ).join(Ticket, Ticket.event_id == Event.id)\
-     .join(Purchase, Purchase.event_id == Event.id)\
-     .filter(Purchase.status == "pago")\
-     .group_by(Event.id, Event.name, Event.date)\
-     .all()
-    
-    vendas_formatadas = [
-        {
-            "id": row.id,
-            "nomeEvento": row.name,
-            "data": row.date,
-            "ingressosVendidos": row.ingressos_vendidos or 0,
-            "valorTotal": float(row.valor_total or 0)
-        }
-        for row in vendas_por_evento
-    ]
-    
-    # 3. Lista de clientes que compraram ingressos
-    # Contar quantos tickets cada compra tem
-    compras = db.query(
-        Purchase.id,
-        User.username,
-        User.email,
-        Event.name.label("evento_nome"),
-        func.count(Ticket.id).label("quantidade_tickets"),
-        Purchase.total_value,
-        Purchase.created_at
-    ).join(User, Purchase.user_id == User.id)\
-     .join(Event, Purchase.event_id == Event.id)\
-     .outerjoin(Ticket, Ticket.purchase_id == Purchase.id)\
-     .filter(Purchase.status == "pago")\
-     .group_by(Purchase.id, User.username, User.email, Event.name, Purchase.total_value, Purchase.created_at)\
-     .order_by(Purchase.created_at.desc())\
-     .all()
-    
-    clientes_formatados = [
-        {
-            "id": row.id,
-            "nome": row.username,
-            "email": row.email,
-            "evento": row.evento_nome,
-            "quantidade": row.quantidade_tickets or 0,
-            "valorTotal": float(row.total_value),
-            "dataCompra": row.created_at.strftime("%Y-%m-%d") if row.created_at else ""
-        }
-        for row in compras
-    ]
+    compras_recentes = db.query(Purchase).order_by(Purchase.created_at.desc()).limit(10).all()
     
     return {
-        "totalVendas": float(total_vendas),
-        "totalIngressos": total_ingressos,
-        "totalEventos": total_eventos,
-        "vendasPorEvento": vendas_formatadas,
-        "clientes": clientes_formatados
+        "total_receita": float(total_vendas),
+        "total_tickets": total_ingressos,
+        "recentes": [
+            {"id": c.id, "usuario": c.user.username, "valor": c.total_value, "data": c.created_at} 
+            for c in compras_recentes
+        ]
     }
-
-@router.get("/vendas-por-evento/{event_id}")
-def relatorio_por_evento(event_id: int, db: Session = Depends(get_db)):
-    vendas_evento = db.query(func.sum(Purchase.total_value)).filter(
-        Purchase.event_id == event_id, 
-        Purchase.status == "pago"
-    ).scalar() or 0.0
-    
-    ingressos_evento = db.query(func.count(Ticket.id)).filter(Ticket.event_id == event_id).scalar() or 0
-
-    return {
-        "event_id": event_id,
-        "receita_total": vendas_evento,
-        "ingressos_vendidos": ingressos_evento
-    }
-
-# --- US15: Painel Detalhado (Dados para Gráficos) ---
-
-@router.get("/dashboard-graficos")
-def dados_grafico_vendas(db: Session = Depends(get_db)):
-    """
-    Retorna vendas agrupadas por dia para plotar gráficos de linha/barra.
-    """
-    # Agrupa compras pagas por data
-    vendas_diarias = db.query(
-        func.date(Purchase.created_at).label("data"),
-        func.sum(Purchase.total_value).label("total")
-    ).filter(Purchase.status == "pago")\
-     .group_by(func.date(Purchase.created_at))\
-     .order_by(func.date(Purchase.created_at)).all()
-
-    return [{"data": str(row.data), "total": row.total} for row in vendas_diarias]
-
-# --- US13: Exportação de Relatórios ---
-
-@router.get("/exportar-csv")
-def exportar_vendas_csv(db: Session = Depends(get_db)):
-    """
-    Gera um arquivo CSV com todas as vendas confirmadas.
-    """
-    vendas = db.query(Purchase).filter(Purchase.status == "pago").all()
-    
-    # Criar um buffer na memória para o CSV
-    output = io.StringIO()
-    writer = csv.writer(output)
-    
-    # Cabeçalho
-    writer.writerow(["ID_Pedido", "ID_Evento", "Quantidade", "Valor_Total", "Metodo_Pagamento", "Data"])
-    
-    # Dados
-    for v in vendas:
-        writer.writerow([v.id, v.event_id, v.quantity, v.total_value, v.payment_type, v.created_at])
-    
-    output.seek(0)
-    
-    return StreamingResponse(
-        iter([output.getvalue()]),
-        media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=relatorio_vendas.csv"}
-    )
