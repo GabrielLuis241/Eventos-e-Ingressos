@@ -68,7 +68,7 @@ export default function Relatorios() {
       document.body.removeChild(a);
     } catch (error) {
       console.error("Erro ao exportar CSV:", error);
-      alert("Erro ao exportar relatório. Tente novamente.");
+      alert("Erro ao exportar relatório CSV. Tente novamente.");
     }
   };
 
@@ -132,22 +132,18 @@ export default function Relatorios() {
             <p className="subtitle">Painel de controle e análises</p>
           </div>
           <div className="header-right">
-            <span className="user-name">Olá, {usuario.username}</span>
-            <button onClick={handleExportarCSV} className="btn btn-success btn-sm">
-              📥 Exportar CSV
-            </button>
-            <button onClick={handleExportarPDF} className="btn btn-primary btn-sm">
-              📄 Exportar PDF
-            </button>
-            <Link to="/admin/eventos" className="btn btn-outline btn-sm">
-              Gerenciar Eventos
-            </Link>
-            <Link to="/" className="btn btn-ghost btn-sm">
-              Home
-            </Link>
-            <button onClick={handleLogout} className="btn btn-ghost btn-sm">
-              Sair
-            </button>
+            <div className="export-buttons">
+              <button onClick={handleExportarCSV} className="btn btn-export-csv">
+                📥 CSV
+              </button>
+              <button onClick={handleExportarPDF} className="btn btn-export-pdf">
+                📄 PDF
+              </button>
+            </div>
+            <div className="nav-buttons">
+              <Link to="/" className="btn btn-nav">Home</Link>
+              <button onClick={handleLogout} className="btn btn-nav">Sair</button>
+            </div>
           </div>
         </div>
       </header>
@@ -160,7 +156,7 @@ export default function Relatorios() {
             <div className="metric-content">
               <h3>Total de Vendas</h3>
               <p className="metric-value">
-                R$ {relatorios.totalVendas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                R$ {(relatorios.totalVendas || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
             </div>
           </div>
@@ -169,7 +165,7 @@ export default function Relatorios() {
             <div className="metric-icon">🎫</div>
             <div className="metric-content">
               <h3>Ingressos Vendidos</h3>
-              <p className="metric-value">{relatorios.totalIngressos}</p>
+              <p className="metric-value">{relatorios.totalIngressos || 0}</p>
             </div>
           </div>
 
@@ -177,7 +173,7 @@ export default function Relatorios() {
             <div className="metric-icon">🎉</div>
             <div className="metric-content">
               <h3>Total de Eventos</h3>
-              <p className="metric-value">{relatorios.totalEventos}</p>
+              <p className="metric-value">{relatorios.totalEventos || 0}</p>
             </div>
           </div>
         </section>
@@ -188,7 +184,7 @@ export default function Relatorios() {
             <h2>📈 Faturamento por Evento</h2>
           </div>
           <div className="table-wrapper">
-            {relatorios.vendasPorEvento.length === 0 ? (
+            {(!relatorios.vendasPorEvento || relatorios.vendasPorEvento.length === 0) ? (
               <div className="no-data">
                 <p>📭 Nenhuma venda registrada ainda.</p>
                 <p>Quando houver vendas, os dados aparecerão aqui.</p>
@@ -210,7 +206,7 @@ export default function Relatorios() {
                       <td>{new Date(evento.data).toLocaleDateString('pt-BR')}</td>
                       <td className="text-center">{evento.ingressosVendidos}</td>
                       <td className="value">
-                        R$ {evento.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {(evento.valorTotal || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
                     </tr>
                   ))}
@@ -219,11 +215,11 @@ export default function Relatorios() {
                   <tr className="total-row">
                     <td colSpan="2"><strong>Total</strong></td>
                     <td className="text-center">
-                      <strong>{relatorios.totalIngressos}</strong>
+                      <strong>{relatorios.totalIngressos || 0}</strong>
                     </td>
                     <td className="value">
                       <strong>
-                        R$ {relatorios.totalVendas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {(relatorios.totalVendas || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </strong>
                     </td>
                   </tr>
@@ -239,7 +235,7 @@ export default function Relatorios() {
             <h2>👥 Clientes que Compraram Ingressos</h2>
           </div>
           <div className="table-wrapper">
-            {relatorios.clientes.length === 0 ? (
+            {(!relatorios.clientes || relatorios.clientes.length === 0) ? (
               <div className="no-data">
                 <p>📭 Nenhum cliente registrado ainda.</p>
                 <p>Quando houver compras, os clientes aparecerão aqui.</p>
@@ -264,7 +260,7 @@ export default function Relatorios() {
                       <td>{cliente.evento}</td>
                       <td className="text-center">{cliente.quantidade}</td>
                       <td className="value">
-                        R$ {cliente.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {(cliente.valorTotal || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </td>
                       <td>{new Date(cliente.dataCompra).toLocaleDateString('pt-BR')}</td>
                     </tr>

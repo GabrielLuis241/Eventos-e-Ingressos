@@ -37,3 +37,40 @@
   border-radius: 10px;
   margin-bottom: 12px;
 }
+
+/* Botões de ação */
+.pagamento-container button {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagamento-container button:first-of-type {
+  background: linear-gradient(135deg, #00d084, #00a676);
+  color: white;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.pagamento-container button:first-of-type:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 208, 132, 0.3);
+}
+
+.pagamento-container button.voltar {
+  background: #f0f0f0;
+  color: #666;
+  margin-top: 8px;
+}
+
+.pagamento-container button.voltar:hover {
+  background: #e0e0e0;
+}

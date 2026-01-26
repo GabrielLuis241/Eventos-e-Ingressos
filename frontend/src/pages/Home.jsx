@@ -3,6 +3,19 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Home.css";
 import { listarEventos } from "../api";
+import { 
+  FaStar, 
+  FaMusic, 
+  FaTheaterMasks, 
+  FaMicrophone, 
+  FaGlassCheers, 
+  FaFutbol, 
+  FaCalendarAlt,
+  FaSearch,
+  FaDollarSign,
+  FaMapMarkerAlt,
+  FaTimes
+} from "react-icons/fa";
 
 export default function Home() {
   const [eventos, setEventos] = useState([]);
@@ -73,14 +86,15 @@ export default function Home() {
   // Categorias fixas
   const categorias = ["todos", "show", "teatro", "palestra", "festa", "esporte", "outros"];
 
-  const getCategoriaEmoji = (cat) => {
-    if (cat === "todos") return "⭐";
-    if (cat === "show") return "🎵";
-    if (cat === "teatro") return "🎭";
-    if (cat === "palestra") return "🎤";
-    if (cat === "festa") return "🎉";
-    if (cat === "esporte") return "⚽";
-    return "📅";
+  const getCategoriaIcon = (cat) => {
+    const iconProps = { size: 32, color: "white" };
+    if (cat === "todos") return <FaStar {...iconProps} />;
+    if (cat === "show") return <FaMusic {...iconProps} />;
+    if (cat === "teatro") return <FaTheaterMasks {...iconProps} />;
+    if (cat === "palestra") return <FaMicrophone {...iconProps} />;
+    if (cat === "festa") return <FaGlassCheers {...iconProps} />;
+    if (cat === "esporte") return <FaFutbol {...iconProps} />;
+    return <FaCalendarAlt {...iconProps} />;
   };
 
   // Extrair locais únicos para o dropdown
@@ -168,21 +182,8 @@ export default function Home() {
         <div className="header-content">
           <div className="logo-section">
             <h1>EVENTOS+</h1>
-            <p>
-              Encontre e compre
-              <br />
-              ingressos para eventos
-            </p>
+            <p>Encontre e compre ingressos para eventos</p>
 
-            <div className="search-bar">
-              <span className="search-icon">🔍</span>
-              <input
-                type="text"
-                placeholder="Buscar eventos..."
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-              />
-            </div>
           </div>
 
           <div className="header-actions">
@@ -222,7 +223,10 @@ export default function Home() {
       <section className="hero-section">
         <div className="hero-grid">
           {destaques[carouselIndex] && (
-            <div className="hero-card">
+            <div 
+              className="hero-card clickable"
+              onClick={() => navigate(`/evento/${destaques[carouselIndex].id}`)}
+            >
               <img
                 src={destaques[carouselIndex].imagem}
                 alt={destaques[carouselIndex].nome}
@@ -234,7 +238,10 @@ export default function Home() {
             </div>
           )}
           {destaques[(carouselIndex + 1) % destaques.length] && (
-            <div className="hero-card center">
+            <div 
+              className="hero-card center clickable"
+              onClick={() => navigate(`/evento/${destaques[(carouselIndex + 1) % destaques.length].id}`)}
+            >
               <img
                 src={destaques[(carouselIndex + 1) % destaques.length].imagem}
                 alt={destaques[(carouselIndex + 1) % destaques.length].nome}
@@ -252,7 +259,10 @@ export default function Home() {
             </div>
           )}
           {destaques[(carouselIndex + 2) % destaques.length] && (
-            <div className="hero-card">
+            <div 
+              className="hero-card clickable"
+              onClick={() => navigate(`/evento/${destaques[(carouselIndex + 2) % destaques.length].id}`)}
+            >
               <img
                 src={destaques[(carouselIndex + 2) % destaques.length].imagem}
                 alt={destaques[(carouselIndex + 2) % destaques.length].nome}
@@ -287,7 +297,7 @@ export default function Home() {
               className={`category-card ${categoriaAtiva === cat ? "active" : ""}`}
               onClick={() => setCategoriaAtiva(cat)}
             >
-              <div className="cat-icon-emoji">{getCategoriaEmoji(cat)}</div>
+              <div className="cat-icon">{getCategoriaIcon(cat)}</div>
               <span className="cat-name">
                 {cat === "todos"
                   ? "Todos"
@@ -305,7 +315,7 @@ export default function Home() {
         {/* BARRA DE FILTROS */}
         <div className="events-filter-bar">
           <div className="filter-search">
-            <span className="filter-search-icon">🔍</span>
+            <span className="filter-search-icon"><FaSearch /></span>
             <input
               type="text"
               placeholder="Buscar por nome ou local..."
@@ -315,28 +325,36 @@ export default function Home() {
           </div>
 
           <div className="filter-group">
-            <label>💰 Preço:</label>
-            <input
-              type="number"
-              placeholder="Mín"
-              value={precoMin}
-              onChange={(e) => setPrecoMin(e.target.value)}
-              min="0"
-              className="filter-price-input"
-            />
-            <span className="filter-separator">-</span>
-            <input
-              type="number"
-              placeholder="Máx"
-              value={precoMax}
-              onChange={(e) => setPrecoMax(e.target.value)}
-              min="0"
-              className="filter-price-input"
-            />
+            <label>
+              <FaDollarSign style={{ marginRight: '5px', fontSize: '0.75rem' }} />
+              Preço:
+            </label>
+            <div className="price-inputs">
+              <input
+                type="number"
+                placeholder="Mín"
+                value={precoMin}
+                onChange={(e) => setPrecoMin(e.target.value)}
+                min="0"
+                className="filter-price-input"
+              />
+              <span className="filter-separator">-</span>
+              <input
+                type="number"
+                placeholder="Máx"
+                value={precoMax}
+                onChange={(e) => setPrecoMax(e.target.value)}
+                min="0"
+                className="filter-price-input"
+              />
+            </div>
           </div>
 
           <div className="filter-group">
-            <label>📍 Local:</label>
+            <label>
+              <FaMapMarkerAlt style={{ marginRight: '5px', fontSize: '0.75rem' }} />
+              Local:
+            </label>
             <select
               value={localFiltro}
               onChange={(e) => setLocalFiltro(e.target.value)}
@@ -361,7 +379,8 @@ export default function Home() {
                 setLocalFiltro("");
               }}
             >
-              ✕ Limpar filtros
+              <FaTimes style={{ marginRight: '5px', fontSize: '0.85rem' }} />
+              Limpar filtros
             </button>
           )}
         </div>

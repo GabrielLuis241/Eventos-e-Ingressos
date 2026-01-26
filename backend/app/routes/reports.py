@@ -93,6 +93,51 @@ def analise_detalhada_evento(event_id: int, db: Session = Depends(get_db)):
 
 # --- 2. EXPORTAÇÃO DINÂMICA (PDF & CSV) ---
 
+@router.get("/exportar-csv")
+def exportar_csv(
+    event_id: Optional[int] = None,
+    periodo: str = Query("all", enum=["7d", "30d", "all"]),
+    db: Session = Depends(get_db)
+):
+    """ Gera CSV filtrado por tempo ou evento específico """
+    query = db.query(Purchase).filter(Purchase.status == "pago")
+    
+    if event_id:
+        query = query.filter(Purchase.event_id == event_id)
+    
+    query = filtrar_por_periodo(query, Purchase.created_at, periodo)
+    vendas = query.order_by(Purchase.created_at.desc()).all()
+
+    # Criar CSV em memória
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Cabeçalho
+    writer.writerow(["Data", "Comprador", "Email", "Evento", "Quantidade", "Valor Total"])
+    
+    # Dados
+    for v in vendas:
+        nome = v.user.username if v.user else "N/A"
+        email = v.user.email if v.user else "N/A"
+        evento_nome = v.event.name if v.event else "N/A"
+        writer.writerow([
+            v.created_at.strftime("%d/%m/%Y %H:%M"),
+            nome,
+            email,
+            evento_nome,
+            v.quantity,
+            f"R$ {v.total_value:.2f}"
+        ])
+    
+    csv_content = output.getvalue()
+    output.close()
+    
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=relatorio_{periodo}.csv"}
+    )
+
 @router.get("/exportar-pdf-avancado")
 def exportar_pdf_custom(
     event_id: Optional[int] = None,
@@ -137,24 +182,63 @@ def exportar_pdf_custom(
     pdf.cell(0, 10, f"RECEITA TOTAL DO PERIODO: R$ {total_acumulado:.2f}", align="R")
 
     return Response(
-        content=pdf.output(),
+        content=bytes(pdf.output()),
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename=relatorio_{periodo}.pdf"}
     )
 
 @router.get("/dashboard-completo")
 def obter_dashboard_completo(db: Session = Depends(get_db)):
-    """ Mantido e otimizado para métricas rápidas """
-    total_vendas = db.query(func.sum(Purchase.total_value)).filter(Purchase.status == "pago").scalar() or 0.0
-    total_ingressos = db.query(func.count(Ticket.id)).scalar() or 0
+    """ Retorna dados para o dashboard de relatórios """
     
-    compras_recentes = db.query(Purchase).order_by(Purchase.created_at.desc()).limit(10).all()
+    # Total de vendas (valor) - mesmo filtro do PDF/CSV
+    total_vendas = db.query(func.sum(Purchase.total_value)).filter(Purchase.status == "pago").scalar() or 0.0
+    
+    # Total de ingressos vendidos
+    total_ingressos = db.query(func.sum(Purchase.quantity)).filter(Purchase.status == "pago").scalar() or 0
+    
+    # Total de eventos
+    total_eventos = db.query(func.count(Event.id)).scalar() or 0
+    
+    # Vendas agrupadas por evento (mesmo dado do PDF)
+    vendas_por_evento = db.query(
+        Event.id,
+        Event.name,
+        Event.date,
+        func.sum(Purchase.quantity).label("ingressos_vendidos"),
+        func.sum(Purchase.total_value).label("valor_total")
+    ).join(Purchase, Purchase.event_id == Event.id).filter(
+        Purchase.status == "pago"
+    ).group_by(Event.id, Event.name, Event.date).all()
+    
+    # Lista de clientes/compras (mesmo dado do PDF)
+    compras = db.query(Purchase).filter(Purchase.status == "pago").order_by(Purchase.created_at.desc()).all()
+    
+    clientes = []
+    for c in compras:
+        clientes.append({
+            "id": c.id,
+            "nome": c.user.username if c.user else "N/A",
+            "email": c.user.email if c.user else "N/A",
+            "evento": c.event.name if c.event else "N/A",
+            "quantidade": c.quantity,
+            "valorTotal": float(c.total_value),
+            "dataCompra": c.created_at.isoformat()
+        })
     
     return {
-        "total_receita": float(total_vendas),
-        "total_tickets": total_ingressos,
-        "recentes": [
-            {"id": c.id, "usuario": c.user.username, "valor": c.total_value, "data": c.created_at} 
-            for c in compras_recentes
-        ]
+        "totalVendas": float(total_vendas),
+        "totalIngressos": int(total_ingressos) if total_ingressos else 0,
+        "totalEventos": int(total_eventos),
+        "vendasPorEvento": [
+            {
+                "id": v.id,
+                "nomeEvento": v.name,
+                "data": str(v.date) if v.date else None,
+                "ingressosVendidos": int(v.ingressos_vendidos or 0),
+                "valorTotal": float(v.valor_total or 0)
+            }
+            for v in vendas_por_evento
+        ],
+        "clientes": clientes
     }

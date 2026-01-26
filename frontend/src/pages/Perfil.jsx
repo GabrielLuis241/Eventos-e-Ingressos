@@ -1,61 +1,16 @@
 // src/pages/Perfil.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { listarMinhasCompras } from "../api";
 import "./Perfil.css";
 
 export default function Perfil() {
     const [usuario, setUsuario] = useState(null);
     const [ingressos, setIngressos] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [qrModalOpen, setQrModalOpen] = useState(false);
+    const [selectedIngresso, setSelectedIngresso] = useState(null);
     const navigate = useNavigate();
-
-    // Mock data - preparado para receber do backend
-    const mockIngressos = [
-        {
-            id: 1,
-            evento: {
-                id: 1,
-                nome: "Show ao Vivo",
-                data: "2025-06-13",
-                horario: "20:00",
-                local: "Arena Central",
-                imagem: "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=900&q=80"
-            },
-            quantidade: 2,
-            valorTotal: 500.00,
-            dataCompra: "2025-05-15",
-            qrCode: "QR123456789"
-        },
-        {
-            id: 2,
-            evento: {
-                id: 2,
-                nome: "Peça de Teatro",
-                data: "2025-06-20",
-                horario: "19:30",
-                local: "Teatro Municipal",
-                imagem: "https://images.unsplash.com/photo-1515165562835-c4c9e0737eaa?auto=format&fit=crop&w=900&q=80"
-            },
-            quantidade: 1,
-            valorTotal: 200.00,
-            dataCompra: "2025-05-18",
-            qrCode: "QR987654321"
-        },
-        {
-            id: 3,
-            evento: {
-                id: 3,
-                nome: "Palestra de Tecnologia",
-                data: "2025-07-05",
-                horario: "09:00",
-                local: "Centro de Convenções",
-                imagem: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80"
-            },
-            quantidade: 1,
-            valorTotal: 150.00,
-            dataCompra: "2025-05-20",
-            qrCode: "QR456789123"
-        }
-    ];
 
     useEffect(() => {
         const salvo = localStorage.getItem("usuarioLogado");
@@ -67,23 +22,55 @@ export default function Perfil() {
         try {
             const user = JSON.parse(salvo);
             setUsuario(user);
-
-            // TODO: Buscar ingressos reais do backend
-            // fetchUserTickets(user.id);
-            setIngressos(mockIngressos);
+            fetchUserTickets();
         } catch {
             navigate("/login");
         }
     }, [navigate]);
 
-    // Função preparada para integração com backend
-    const fetchUserTickets = async (userId) => {
+    // Busca ingressos reais do backend
+    const fetchUserTickets = async () => {
         try {
-            // const data = await apiGet(`/usuarios/${userId}/ingressos/`);
-            // setIngressos(data);
+            setLoading(true);
+            const data = await listarMinhasCompras();
+            console.log("Dados do backend:", data); // Debug
+            // Mapeia os dados do backend para o formato esperado pelo frontend
+            const ingressosMapeados = (data || []).map(compra => {
+                const evento = compra.evento || {};
+                return {
+                    id: compra.id,
+                    evento: {
+                        id: evento.id || null,
+                        nome: evento.nome || evento.name || "Evento",
+                        data: evento.data || evento.date || null,
+                        horario: evento.horario || evento.time || "",
+                        local: evento.local || evento.location || "",
+                        imagem: evento.imagem || evento.image || ""
+                    },
+                    quantidade: compra.quantidade || compra.quantity || 1,
+                    valorTotal: compra.valor_total || compra.total_value || 0,
+                    dataCompra: compra.data_compra || compra.created_at,
+                    qrCodes: compra.qr_codes || []
+                };
+            });
+            console.log("Ingressos mapeados:", ingressosMapeados); // Debug
+            setIngressos(ingressosMapeados);
         } catch (error) {
             console.error("Erro ao buscar ingressos:", error);
+            setIngressos([]);
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const handleVerQrCode = (ingresso) => {
+        setSelectedIngresso(ingresso);
+        setQrModalOpen(true);
+    };
+
+    const closeQrModal = () => {
+        setQrModalOpen(false);
+        setSelectedIngresso(null);
     };
 
     function handleLogout() {
@@ -93,7 +80,7 @@ export default function Perfil() {
         navigate("/login");
     }
 
-    if (!usuario) {
+    if (!usuario || loading) {
         return <div className="loading">Carregando...</div>;
     }
 
@@ -223,7 +210,10 @@ export default function Perfil() {
                                                     R$ {ingresso.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                                 </span>
                                             </div>
-                                            <button className="btn btn-outline btn-sm">
+                                            <button 
+                                                className="btn btn-outline btn-sm"
+                                                onClick={() => handleVerQrCode(ingresso)}
+                                            >
                                                 Ver QR Code
                                             </button>
                                         </div>
@@ -238,6 +228,45 @@ export default function Perfil() {
                     )}
                 </section>
             </div>
+
+            {/* Modal QR Code */}
+            {qrModalOpen && selectedIngresso && (
+                <div className="qr-modal-overlay" onClick={closeQrModal}>
+                    <div className="qr-modal" onClick={(e) => e.stopPropagation()}>
+                        <button className="qr-modal-close" onClick={closeQrModal}>×</button>
+                        <h2>QR Codes - {selectedIngresso.evento?.nome}</h2>
+                        <p className="qr-modal-info">
+                            {selectedIngresso.quantidade} ingresso(s) para este evento
+                        </p>
+                        
+                        <div className="qr-codes-list">
+                            {selectedIngresso.qrCodes && selectedIngresso.qrCodes.length > 0 ? (
+                                selectedIngresso.qrCodes.map((qr, index) => (
+                                    <div key={qr.id} className={`qr-code-item ${qr.usado ? 'usado' : ''}`}>
+                                        <div className="qr-code-number">Ingresso {index + 1}</div>
+                                        <div className="qr-code-image">
+                                            <img 
+                                                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qr.codigo)}`}
+                                                alt={`QR Code ${index + 1}`}
+                                            />
+                                        </div>
+                                        <div className="qr-code-text">{qr.codigo}</div>
+                                        {qr.usado && <div className="qr-usado-badge">UTILIZADO</div>}
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="no-qr">Nenhum QR Code disponível para este ingresso.</p>
+                            )}
+                        </div>
+
+                        <div className="qr-modal-footer">
+                            <p><strong>Evento:</strong> {selectedIngresso.evento?.nome}</p>
+                            <p><strong>Data:</strong> {selectedIngresso.evento?.data ? new Date(selectedIngresso.evento.data).toLocaleDateString('pt-BR') : '-'}</p>
+                            <p><strong>Local:</strong> {selectedIngresso.evento?.local}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

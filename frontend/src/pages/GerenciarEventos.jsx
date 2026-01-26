@@ -3,10 +3,13 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./GerenciarEventos.css";
 import { listarEventos, criarEvento, removerEvento } from "../api";
+import ImageCropper from "../components/ImageCropper";
 
 export default function GerenciarEventos() {
   const [eventos, setEventos] = useState([]);
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [mostrarCropper, setMostrarCropper] = useState(false);
+  const [imagemParaCrop, setImagemParaCrop] = useState(null);
   const [form, setForm] = useState({
     nome: "",
     descricao: "",
@@ -15,7 +18,8 @@ export default function GerenciarEventos() {
     local: "",
     ingressos_disponiveis: 0,
     preco: 0,
-    imagem: "",
+    imagem: null,
+    imagemPreview: "",
     categoria: "show",
   });
 
@@ -31,24 +35,84 @@ export default function GerenciarEventos() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
+  function handleImagemChange(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagemParaCrop(reader.result);
+        setMostrarCropper(true);
+      };
+      reader.readAsDataURL(file);
+    }
+    // Limpa o input para permitir selecionar o mesmo arquivo novamente
+    e.target.value = '';
+  }
+
+  function handleCropComplete(croppedBlob) {
+    const croppedFile = new File([croppedBlob], 'imagem-evento.jpg', { type: 'image/jpeg' });
+    setForm({
+      ...form,
+      imagem: croppedFile,
+      imagemPreview: URL.createObjectURL(croppedBlob)
+    });
+    setMostrarCropper(false);
+    setImagemParaCrop(null);
+  }
+
+  function handleCropCancel() {
+    setMostrarCropper(false);
+    setImagemParaCrop(null);
+  }
+
   async function handleCriarEvento(e) {
     e.preventDefault();
 
-    const payload = {
-      nome: form.nome,
-      descricao: form.descricao,
-      data: form.data,
-      horario: form.horario,
-      local: form.local,
-      total_tickets: Number(form.ingressos_disponiveis || 0),
-      price: Number(form.preco || 0),
-      imagem: form.imagem,
-      categoria: form.categoria,
-    };
-
     try {
-      const novo = await criarEvento(payload);
-      setEventos((prev) => [...prev, novo]);
+      const formData = new FormData();
+      formData.append("nome", form.nome);
+      formData.append("descricao", form.descricao || "");
+      formData.append("data", form.data);
+      formData.append("horario", form.horario);
+      formData.append("local", form.local);
+      formData.append("capacidade", Number(form.ingressos_disponiveis || 0));
+      formData.append("preco", Number(form.preco || 0));
+      formData.append("categoria", form.categoria);
+      
+      if (form.imagem && form.imagem instanceof File) {
+        formData.append("file", form.imagem);
+      }
+
+      const token = localStorage.getItem("accessToken");
+      const res = await fetch("http://localhost:8000/admin/eventos/upload", {
+        method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText);
+      }
+
+      const novo = await res.json();
+      // Mapear para o formato do frontend
+      const eventoMapeado = {
+        id: novo.id,
+        nome: novo.name,
+        descricao: novo.description,
+        data: novo.date,
+        horario: novo.time,
+        local: novo.location,
+        imagem: novo.image,
+        ingressos_disponiveis: novo.available_tickets,
+        price: novo.price,
+        categoria: novo.category,
+      };
+      
+      setEventos((prev) => [...prev, eventoMapeado]);
       alert("Evento criado com sucesso!");
       setMostrarModal(false);
       setForm({
@@ -59,7 +123,8 @@ export default function GerenciarEventos() {
         local: "",
         ingressos_disponiveis: 0,
         preco: 0,
-        imagem: "",
+        imagem: null,
+        imagemPreview: "",
         categoria: "show",
       });
     } catch (err) {
@@ -279,14 +344,31 @@ export default function GerenciarEventos() {
                 placeholder="Descreva o evento..."
               />
 
-              <label>URL da Imagem (opcional)</label>
-              <input
-                type="text"
-                name="imagem"
-                value={form.imagem}
-                onChange={atualizarForm}
-                placeholder="https://exemplo.com/imagem.jpg"
-              />
+              <label>Imagem do Evento (opcional)</label>
+              <div className="upload-imagem">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImagemChange}
+                  id="upload-imagem"
+                  className="input-file"
+                />
+                <label htmlFor="upload-imagem" className="btn-upload">
+                  📷 Escolher Imagem
+                </label>
+                {form.imagemPreview && (
+                  <div className="preview-imagem">
+                    <img src={form.imagemPreview} alt="Preview" />
+                    <button 
+                      type="button" 
+                      className="btn-remover-img"
+                      onClick={() => setForm({ ...form, imagem: null, imagemPreview: "" })}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
 
               <div className="botoes-modal">
                 <button type="submit" className="btn-roxo-criar">
@@ -304,6 +386,16 @@ export default function GerenciarEventos() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Modal de Cortar Imagem */}
+      {mostrarCropper && imagemParaCrop && (
+        <ImageCropper
+          imageSrc={imagemParaCrop}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+          aspectRatio={16 / 9}
+        />
       )}
     </div>
   );
