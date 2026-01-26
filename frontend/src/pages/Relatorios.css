@@ -57,7 +57,7 @@
 }
 
 .btn-export-pdf {
-    background: #dc3545;
+    background: #49b7cb;
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -65,13 +65,30 @@
 }
 
 .btn-export-pdf:hover {
-    background: #c82333;
+    background: #61b1cf;
 }
 
 .nav-buttons {
     display: flex;
     gap: 0.5rem;
 }
+
+.btn-gerenciar-eventos {
+  background-color: #6c2bd9;
+  color: #fff;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px; 
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-export-pdf:hover {
+    background: #6c2bd9;
+}
+
 
 .btn-nav {
     background: transparent;
@@ -83,6 +100,17 @@
 .btn-nav:hover {
     background: rgba(255, 255, 255, 0.1);
     color: white;
+}
+
+.btn-sair {
+    background-color: #dc3545; 
+    color: white !important;
+    border-radius: 8px;
+    font-size: 16px; 
+}
+
+.btn-sair:hover {
+    background-color: #c82333;
 }
 
 .btn {
@@ -367,4 +395,47 @@
 
 .btn-success:hover {
     background: #218838;
+}
+
+/* Filtros */
+
+.filtros {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.filtros div {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+}
+
+.filtros label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #6b7280;
+}
+
+.filtros select {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background-color: #f9fafb;
+  color: #111827;
+}
+
+.filtros select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
 }

@@ -1,4 +1,3 @@
-// src/pages/Relatorios.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Relatorios.css";
@@ -10,6 +9,10 @@ export default function Relatorios() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const navigate = useNavigate();
+
+  // 🟣 ESTADOS DOS FILTROS (NOVO)
+  const [filtroEvento, setFiltroEvento] = useState("todos");
+  const [filtroPeriodo, setFiltroPeriodo] = useState("todos");
 
   useEffect(() => {
     const salvo = localStorage.getItem("usuarioLogado");
@@ -31,10 +34,8 @@ export default function Relatorios() {
       return;
     }
 
-    // Buscar dados reais do backend
     buscarRelatorios();
 
-    // Atualização automática a cada 30 segundos
     const intervalId = setInterval(() => {
       buscarRelatorios();
     }, 30000);
@@ -57,7 +58,10 @@ export default function Relatorios() {
 
   const handleExportarCSV = async () => {
     try {
-      const blob = await exportarRelatorioCSV();
+      const blob = await exportarRelatorioCSV({
+        evento: filtroEvento,
+        periodo: filtroPeriodo
+      }); 
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -74,7 +78,10 @@ export default function Relatorios() {
 
   const handleExportarPDF = async () => {
     try {
-      const blob = await exportarRelatorioPDF();
+      const blob = await exportarRelatorioPDF({
+        evento: filtroEvento,
+        periodo: filtroPeriodo
+      });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -121,34 +128,51 @@ export default function Relatorios() {
     return <div className="loading">Carregando...</div>;
   }
 
+  // 🟣 FUNÇÃO FILTRO POR PERÍODO (NOVO)
+  const filtrarPorPeriodo = (data) => {
+    if (filtroPeriodo === "todos") return true;
+    const hoje = new Date();
+    const dataItem = new Date(data);
+    const diffDias = (hoje - dataItem) / (1000 * 60 * 60 * 24);
+    if (filtroPeriodo === "7dias") return diffDias <= 7;
+    if (filtroPeriodo === "15dias") return diffDias <= 15;
+    if (filtroPeriodo === "30dias") return diffDias <= 30;
+    return true;
+  };
+
+  // 🟣 DADOS FILTRADOS (NOVO)
+  const vendasFiltradas = (relatorios.vendasPorEvento || [])
+    .filter(v => filtroEvento === "todos" || String(v.id) === String(filtroEvento))
+    .filter(v => filtrarPorPeriodo(v.data));
+
+  const clientesFiltrados = (relatorios.clientes || [])
+    .filter(c => filtroEvento === "todos" || String(c.eventoId) === String(filtroEvento))
+    .filter(c => filtrarPorPeriodo(c.dataCompra));
+
   return (
     <div className="relatorios-page">
-      {/* Header */}
       <header className="relatorios-header">
         <div className="header-content">
           <div className="header-left">
-            <Link to="/" className="back-button">← Voltar</Link>
+        
             <h1>📊 Relatórios</h1>
             <p className="subtitle">Painel de controle e análises</p>
           </div>
           <div className="header-right">
             <div className="export-buttons">
-              <button onClick={handleExportarCSV} className="btn btn-export-csv">
-                📥 CSV
-              </button>
-              <button onClick={handleExportarPDF} className="btn btn-export-pdf">
-                📄 PDF
-              </button>
+              <button onClick={handleExportarCSV} className="btn btn-export-csv">📥 CSV</button>
+              <button onClick={handleExportarPDF} className="btn btn-export-pdf">📄 PDF</button>
+              <button onClick={() => navigate("/admin/eventos")} className="btn-gerenciar-eventos">🎭 GERENCIAR EVENTOS</button>
             </div>
             <div className="nav-buttons">
               <Link to="/" className="btn btn-nav">Home</Link>
-              <button onClick={handleLogout} className="btn btn-nav">Sair</button>
+              <button onClick={handleLogout} className="btn-nav btn-sair">SAIR</button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="relatorios-container">
+        <div className="relatorios-container">
         {/* Cards de Métricas */}
         <section className="metrics-section">
           <div className="metric-card primary">
@@ -178,16 +202,38 @@ export default function Relatorios() {
           </div>
         </section>
 
-        {/* Faturamento por Evento */}
+        {/* 🔎 FILTROS (NOVO) */}
+        <section className="filtros">
+          <div>
+            <label>Evento</label>
+            <select value={filtroEvento} onChange={(e) => setFiltroEvento(e.target.value)}>
+              <option value="todos">Todos os eventos</option>
+              {relatorios.vendasPorEvento?.map(ev => (
+                <option key={ev.id} value={ev.id}>{ev.nomeEvento}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label>Período</label>
+            <select value={filtroPeriodo} onChange={(e) => setFiltroPeriodo(e.target.value)}>
+              <option value="todos">Todo o período</option>
+              <option value="7dias">Últimos 7 dias</option>
+              <option value="15dias">Últimos 15 dias</option>
+              <option value="30dias">Últimos 30 dias</option>
+            </select>
+          </div>
+        </section>
+
+        {/* TABELA VENDAS (USA FILTRADAS) */}
         <section className="table-section">
           <div className="section-header">
             <h2>📈 Faturamento por Evento</h2>
           </div>
           <div className="table-wrapper">
-            {(!relatorios.vendasPorEvento || relatorios.vendasPorEvento.length === 0) ? (
+            {vendasFiltradas.length === 0 ? (
               <div className="no-data">
-                <p>📭 Nenhuma venda registrada ainda.</p>
-                <p>Quando houver vendas, os dados aparecerão aqui.</p>
+                <p>📭 Nenhuma venda encontrada para esse filtro.</p>
               </div>
             ) : (
               <table className="data-table">
@@ -199,8 +245,9 @@ export default function Relatorios() {
                     <th>Faturamento</th>
                   </tr>
                 </thead>
+
                 <tbody>
-                  {relatorios.vendasPorEvento.map((evento) => (
+                  {vendasFiltradas.map((evento) => (
                     <tr key={evento.id}>
                       <td className="event-name">{evento.nomeEvento}</td>
                       <td>{new Date(evento.data).toLocaleDateString('pt-BR')}</td>
@@ -211,34 +258,20 @@ export default function Relatorios() {
                     </tr>
                   ))}
                 </tbody>
-                <tfoot>
-                  <tr className="total-row">
-                    <td colSpan="2"><strong>Total</strong></td>
-                    <td className="text-center">
-                      <strong>{relatorios.totalIngressos || 0}</strong>
-                    </td>
-                    <td className="value">
-                      <strong>
-                        R$ {(relatorios.totalVendas || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </strong>
-                    </td>
-                  </tr>
-                </tfoot>
               </table>
             )}
           </div>
         </section>
 
-        {/* Lista de Clientes */}
+        {/* CLIENTES FILTRADOS */}
         <section className="table-section">
           <div className="section-header">
             <h2>👥 Clientes que Compraram Ingressos</h2>
           </div>
           <div className="table-wrapper">
-            {(!relatorios.clientes || relatorios.clientes.length === 0) ? (
+            {clientesFiltrados.length === 0 ? (
               <div className="no-data">
-                <p>📭 Nenhum cliente registrado ainda.</p>
-                <p>Quando houver compras, os clientes aparecerão aqui.</p>
+                <p>📭 Nenhum cliente encontrado para esse filtro.</p>
               </div>
             ) : (
               <table className="data-table">
@@ -247,13 +280,13 @@ export default function Relatorios() {
                     <th>Cliente</th>
                     <th>Email</th>
                     <th>Evento</th>
-                    <th>Quantidade</th>
-                    <th>Valor Total</th>
-                    <th>Data da Compra</th>
+                    <th>Qtd</th>
+                    <th>Valor</th>
+                    <th>Data</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {relatorios.clientes.map((cliente) => (
+                  {clientesFiltrados.map((cliente) => (
                     <tr key={cliente.id}>
                       <td className="client-name">{cliente.nome}</td>
                       <td className="email">{cliente.email}</td>
@@ -270,6 +303,7 @@ export default function Relatorios() {
             )}
           </div>
         </section>
+
       </div>
     </div>
   );
