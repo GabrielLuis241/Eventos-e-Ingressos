@@ -14,6 +14,18 @@ export default function Relatorios() {
   const [filtroEvento, setFiltroEvento] = useState("todos");
   const [filtroPeriodo, setFiltroPeriodo] = useState("todos");
 
+  const calcularDataInicial = (periodo) => {
+    if (periodo === "todos") return null;
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const dias = Number(periodo);
+    hoje.setDate(hoje.getDate() - dias);
+
+    return hoje.toISOString();
+  };
+
   useEffect(() => {
     const salvo = localStorage.getItem("usuarioLogado");
     if (!salvo) {
@@ -56,45 +68,49 @@ export default function Relatorios() {
     }
   };
 
-  const handleExportarCSV = async () => {
-    try {
-      const blob = await exportarRelatorioCSV({
-        evento: filtroEvento,
-        periodo: filtroPeriodo
-      }); 
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `relatorio_vendas_${new Date().toISOString().split("T")[0]}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error("Erro ao exportar CSV:", error);
-      alert("Erro ao exportar relatório CSV. Tente novamente.");
-    }
-  };
+ const handleExportarCSV = async () => {
+  try {
+    const dataInicial = calcularDataInicial(filtroPeriodo);
 
-  const handleExportarPDF = async () => {
-    try {
-      const blob = await exportarRelatorioPDF({
-        evento: filtroEvento,
-        periodo: filtroPeriodo
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `relatorio_vendas_${new Date().toISOString().split("T")[0]}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error("Erro ao exportar PDF:", error);
-      alert("Erro ao exportar relatório em PDF. Tente novamente.");
-    }
-  };
+    const blob = await exportarRelatorioCSV({
+      evento: filtroEvento === "todos" ? null : filtroEvento,
+      dataInicial
+    });
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `relatorio_vendas_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+  } catch (error) {
+    console.error("Erro ao exportar CSV:", error);
+    alert("Erro ao exportar relatório CSV. Tente novamente.");
+  }
+};
+
+const handleExportarPDF = async () => {
+  try {
+    const dataInicial = calcularDataInicial(filtroPeriodo);
+
+    const blob = await exportarRelatorioPDF({
+      evento: filtroEvento === "todos" ? null : filtroEvento,
+      dataInicial
+    });
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `relatorio_vendas_${new Date().toISOString().split("T")[0]}.pdf`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+  } catch (error) {
+    console.error("Erro ao exportar PDF:", error);
+    alert("Erro ao exportar relatório em PDF. Tente novamente.");
+  }
+};
 
   function handleLogout() {
     localStorage.removeItem("accessToken");
@@ -129,16 +145,17 @@ export default function Relatorios() {
   }
 
   // 🟣 FUNÇÃO FILTRO POR PERÍODO (NOVO)
-  const filtrarPorPeriodo = (data) => {
-    if (filtroPeriodo === "todos") return true;
-    const hoje = new Date();
-    const dataItem = new Date(data);
-    const diffDias = (hoje - dataItem) / (1000 * 60 * 60 * 24);
-    if (filtroPeriodo === "7dias") return diffDias <= 7;
-    if (filtroPeriodo === "15dias") return diffDias <= 15;
-    if (filtroPeriodo === "30dias") return diffDias <= 30;
-    return true;
-  };
+const filtrarPorPeriodo = (data) => {
+  if (filtroPeriodo === "todos") return true;
+
+  const hoje = new Date();
+  const dataItem = new Date(data);
+
+  const diffDias =
+    (hoje.getTime() - dataItem.getTime()) / (1000 * 60 * 60 * 24);
+
+  return diffDias <= Number(filtroPeriodo);
+};
 
   // 🟣 DADOS FILTRADOS (NOVO)
   const vendasFiltradas = (relatorios.vendasPorEvento || [])
@@ -217,10 +234,10 @@ export default function Relatorios() {
           <div>
             <label>Período</label>
             <select value={filtroPeriodo} onChange={(e) => setFiltroPeriodo(e.target.value)}>
-              <option value="todos">Todo o período</option>
-              <option value="7dias">Últimos 7 dias</option>
-              <option value="15dias">Últimos 15 dias</option>
-              <option value="30dias">Últimos 30 dias</option>
+              <option value="todos">Todos</option>
+              <option value="7">Últimos 7 dias</option>
+              <option value="15">Últimos 15 dias</option>
+              <option value="30">Últimos 30 dias</option>
             </select>
           </div>
         </section>
