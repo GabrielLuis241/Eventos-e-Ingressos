@@ -38,11 +38,13 @@ class PDFReport(FPDF):
 # --- Utilitário para Filtro de Tempo ---
 def filtrar_por_periodo(query, model_attr, periodo: str):
     hoje = datetime.utcnow()
-    if periodo == "7d":
+    if periodo == "7dias":
         return query.filter(model_attr >= hoje - timedelta(days=7))
-    elif periodo == "30d":
+    elif periodo == "15dias":
+        return query.filter(model_attr >= hoje - timedelta(days=15))
+    elif periodo == "30dias":
         return query.filter(model_attr >= hoje - timedelta(days=30))
-    return query
+
 
 # --- 1. DASHBOARD E GRÁFICOS (US15) ---
 
@@ -95,15 +97,16 @@ def analise_detalhada_evento(event_id: int, db: Session = Depends(get_db)):
 
 @router.get("/exportar-csv")
 def exportar_csv(
-    event_id: Optional[int] = None,
-    periodo: str = Query("all", enum=["7d", "30d", "all"]),
+    evento: Optional[int] = None,  
+    periodo: str = Query("todos"),  
     db: Session = Depends(get_db)
 ):
     """ Gera CSV filtrado por tempo ou evento específico """
     query = db.query(Purchase).filter(Purchase.status == "pago")
     
-    if event_id:
-        query = query.filter(Purchase.event_id == event_id)
+    if evento:
+        query = query.filter(Purchase.event_id == evento)
+
     
     query = filtrar_por_periodo(query, Purchase.created_at, periodo)
     vendas = query.order_by(Purchase.created_at.desc()).all()
@@ -140,18 +143,19 @@ def exportar_csv(
 
 @router.get("/exportar-pdf-avancado")
 def exportar_pdf_custom(
-    event_id: Optional[int] = None,
-    periodo: str = Query("all", enum=["7d", "30d", "all"]),
+    evento: Optional[int] = None,
+    periodo: str = Query("todos"),
     db: Session = Depends(get_db)
 ):
     """ Gera PDF filtrado por tempo ou evento específico """
     query = db.query(Purchase).filter(Purchase.status == "pago")
     
     titulo_relatorio = "Relatorio Geral de Vendas"
-    if event_id:
-        evento = db.query(Event).filter(Event.id == event_id).first()
-        query = query.filter(Purchase.event_id == event_id)
-        titulo_relatorio = f"Vendas: {evento.name}"
+    if evento:
+        evento_obj = db.query(Event).filter(Event.id == evento).first()
+        query = query.filter(Purchase.event_id == evento)
+        titulo_relatorio = f"Vendas: {evento_obj.name}"
+
     
     query = filtrar_por_periodo(query, Purchase.created_at, periodo)
     vendas = query.order_by(Purchase.created_at.desc()).all()
