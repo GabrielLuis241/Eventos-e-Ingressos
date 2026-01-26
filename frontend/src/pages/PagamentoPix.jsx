@@ -8,7 +8,7 @@ export default function PagamentoPix() {
   const { purchaseId } = useParams();
   const location = useLocation();
   const { compra, evento } = location.state || {};
-  
+
   const [loading, setLoading] = useState(false);
 
   const qrCode =
@@ -19,7 +19,7 @@ export default function PagamentoPix() {
     try {
       await confirmarCompra(purchaseId || compra?.id);
       alert("Pagamento confirmado com sucesso!");
-      navigate("/confirmacao");
+      navigate("/confirmacao", { state: { purchaseId: purchaseId || compra?.id } });
     } catch (err) {
       console.error(err);
       alert("Erro ao confirmar pagamento: " + err.message);
@@ -34,11 +34,11 @@ export default function PagamentoPix() {
       {evento && <p>Evento: <strong>{evento.nome}</strong></p>}
       {compra && <p>Quantidade: <strong>{compra.quantity}</strong> ingresso(s)</p>}
       {compra && <p>Valor total: <strong>R$ {compra.total_value?.toFixed(2)}</strong></p>}
-      
+
       <p>Escaneie o QR Code abaixo para realizar o pagamento:</p>
       <img src={qrCode} alt="QR Code PIX" className="qr-code" />
       <p>Status: <strong>Aguardando pagamento...</strong></p>
-      
+
       <button onClick={handleConfirmar} disabled={loading}>
         {loading ? "Confirmando..." : "Já paguei"}
       </button>

@@ -16,7 +16,69 @@
 
 .confirmacao-container p {
   color: #444;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.loading {
+  padding: 40px;
+  color: #6A0DAD;
+  font-size: 1.1rem;
+}
+
+/* Info do evento */
+.evento-info {
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.evento-info h3 {
+  color: #6A0DAD;
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+}
+
+.evento-info p {
+  margin: 4px 0;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.instrucao {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Card do Ticket */
+.ticket-card {
+  background: #fafafa;
+  border: 2px dashed #6A0DAD;
+  border-radius: 16px;
+  padding: 24px;
+  margin: 20px 0;
+}
+
+.codigo-ingresso {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.codigo-ingresso .label {
+  font-size: 0.85rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.codigo-ingresso .codigo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #6A0DAD;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
 }
 
 .qr-code {
@@ -24,18 +86,97 @@
   display: block;
   width: 200px;
   height: 200px;
+  border-radius: 8px;
+}
+
+.codigo-completo {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.codigo-completo small {
+  font-size: 0.7rem;
+  color: #999;
+  word-break: break-all;
+}
+
+/* Navegação de múltiplos tickets */
+.navegacao-tickets {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.btn-nav {
+  padding: 8px 16px;
+  background: #e0e0e0;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.btn-nav:hover:not(:disabled) {
+  background: #6A0DAD;
+  color: #fff;
+}
+
+.btn-nav:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.contador {
+  font-weight: 600;
+  color: #6A0DAD;
+}
+
+/* Botões de ação */
+.acoes {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .acoes button {
-  margin: 0.5rem;
-  padding: 12px 20px;
+  padding: 12px 24px;
   background: #6A0DAD;
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 999px;
   cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .acoes button:hover {
   background: #580b9a;
+  transform: translateY(-2px);
+}
+
+.aviso {
+  background: #fff3cd;
+  color: #856404;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+/* Print styles */
+@media print {
+
+  .acoes,
+  .navegacao-tickets {
+    display: none;
+  }
+
+  .confirmacao-container {
+    box-shadow: none;
+    margin: 0;
+  }
 }

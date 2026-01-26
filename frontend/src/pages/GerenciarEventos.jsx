@@ -78,7 +78,7 @@ export default function GerenciarEventos() {
       formData.append("capacidade", Number(form.ingressos_disponiveis || 0));
       formData.append("preco", Number(form.preco || 0));
       formData.append("categoria", form.categoria);
-      
+
       if (form.imagem && form.imagem instanceof File) {
         formData.append("file", form.imagem);
       }
@@ -111,7 +111,7 @@ export default function GerenciarEventos() {
         price: novo.price,
         categoria: novo.category,
       };
-      
+
       setEventos((prev) => [...prev, eventoMapeado]);
       alert("Evento criado com sucesso!");
       setMostrarModal(false);
@@ -156,6 +156,7 @@ export default function GerenciarEventos() {
           </div>
           <div className="header-actions">
             <Link to="/" className="btn-voltar">← Home</Link>
+            <Link to="/admin/usuarios" className="btn-usuarios">👥 Usuários</Link>
             <Link to="/cadastro/admin" className="btn-novo-admin">👨‍💼 Novo Admin</Link>
             <Link to="/relatorios" className="btn-relatorios">📊 Relatórios</Link>
           </div>
@@ -182,8 +183,8 @@ export default function GerenciarEventos() {
               {eventos.map((evento) => (
                 <div key={evento.id} className="evento-card-admin">
                   <div className="evento-imagem-admin">
-                    <img 
-                      src={evento.imagem || 'https://via.placeholder.com/400x200?text=Sem+Imagem'} 
+                    <img
+                      src={evento.imagem || 'https://via.placeholder.com/400x200?text=Sem+Imagem'}
                       alt={evento.nome}
                     />
                     <div className="acoes-overlay">
@@ -359,8 +360,8 @@ export default function GerenciarEventos() {
                 {form.imagemPreview && (
                   <div className="preview-imagem">
                     <img src={form.imagemPreview} alt="Preview" />
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       className="btn-remover-img"
                       onClick={() => setForm({ ...form, imagem: null, imagemPreview: "" })}
                     >

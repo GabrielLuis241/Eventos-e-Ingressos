@@ -8,7 +8,7 @@ export default function PagamentoCartao() {
   const [validade, setValidade] = useState("");
   const [cvv, setCvv] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   const navigate = useNavigate();
   const { purchaseId } = useParams();
   const location = useLocation();
@@ -20,12 +20,12 @@ export default function PagamentoCartao() {
       alert("Preencha os dados corretamente.");
       return;
     }
-    
+
     setLoading(true);
     try {
       await confirmarCompra(purchaseId || compra?.id);
       alert("Pagamento aprovado!");
-      navigate("/confirmacao");
+      navigate("/confirmacao", { state: { purchaseId: purchaseId || compra?.id } });
     } catch (err) {
       console.error(err);
       alert("Erro ao processar pagamento: " + err.message);
@@ -40,7 +40,7 @@ export default function PagamentoCartao() {
       {evento && <p>Evento: <strong>{evento.nome}</strong></p>}
       {compra && <p>Quantidade: <strong>{compra.quantity}</strong> ingresso(s)</p>}
       {compra && <p>Valor total: <strong>R$ {compra.total_value?.toFixed(2)}</strong></p>}
-      
+
       <form onSubmit={handlePagamento}>
         <input
           type="text"

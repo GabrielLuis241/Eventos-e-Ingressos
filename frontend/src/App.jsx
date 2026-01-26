@@ -20,6 +20,7 @@ import ConfirmacaoCompra from './pages/ConfirmacaoCompra';
 import EditarEvento from './pages/EditarEvento';
 import Relatorios from './pages/Relatorios';
 import Perfil from './pages/Perfil';
+import GerenciarUsuarios from './pages/GerenciarUsuarios';
 
 import './App.css';
 
@@ -33,6 +34,7 @@ function App() {
           <Route path="/evento/:id" element={<EventoDetail />} />
           <Route path="/admin/eventos" element={<GerenciarEventos />} />
           <Route path="/admin/eventos/:id/editar" element={<EditarEvento />} />
+          <Route path="/admin/usuarios" element={<GerenciarUsuarios />} />
           <Route path="/evento/:id/compra" element={<CompraIngresso />} />
 
           <Route path="/pagamento/cartao" element={<PagamentoCartao />} />

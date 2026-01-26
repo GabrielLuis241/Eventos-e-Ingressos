@@ -1,0 +1,367 @@
+.gerenciar-usuarios-page {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 0;
+}
+
+.gerenciar-usuarios-page .admin-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 20px 5vw;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 32px;
+}
+
+.gerenciar-usuarios-page .admin-header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.gerenciar-usuarios-page .titulo {
+  color: #6a0dad;
+  margin: 0;
+  font-size: 2rem;
+}
+
+.gerenciar-usuarios-page .subtitulo {
+  color: #666;
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+}
+
+.gerenciar-usuarios-page .header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.gerenciar-usuarios-page .btn-voltar,
+.gerenciar-usuarios-page .btn-eventos,
+.gerenciar-usuarios-page .btn-relatorios {
+  padding: 10px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.gerenciar-usuarios-page .btn-voltar {
+  background: #e0e0e0;
+  color: #444;
+}
+
+.gerenciar-usuarios-page .btn-voltar:hover {
+  background: #d0d0d0;
+}
+
+.gerenciar-usuarios-page .btn-eventos {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.gerenciar-usuarios-page .btn-eventos:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+}
+
+.gerenciar-usuarios-page .btn-relatorios {
+  background: #6a0dad;
+  color: #fff;
+}
+
+.gerenciar-usuarios-page .btn-relatorios:hover {
+  background: #5c0d9a;
+  transform: translateY(-2px);
+}
+
+.gerenciar-usuarios-page .admin-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 5vw 60px;
+}
+
+/* Filtros */
+.filtros-container {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 250px;
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 14px 14px 14px 48px;
+  border-radius: 999px;
+  border: none;
+  font-size: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.filtro-tipo {
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: none;
+  font-size: 1rem;
+  background: #fff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filtro-tipo:focus {
+  outline: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Stats */
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.stat-number {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #6a0dad;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Tabela de Usuários */
+.usuarios-section {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.loading-container {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e0e0e0;
+  border-top-color: #6a0dad;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.no-users {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.no-users p {
+  margin: 10px 0;
+  font-size: 1.1rem;
+}
+
+.usuarios-table-container {
+  overflow-x: auto;
+}
+
+.usuarios-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.usuarios-table th,
+.usuarios-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.usuarios-table th {
+  background: #f8f9fa;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.usuarios-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.usuarios-table tbody tr:hover {
+  background: #f8f5ff;
+}
+
+.td-id {
+  color: #888;
+  font-weight: 600;
+}
+
+.td-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.td-email {
+  color: #666;
+}
+
+.td-data {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.badge {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge-admin {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: #fff;
+}
+
+.badge-cliente {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: #fff;
+}
+
+.badge-outro {
+  background: #e0e0e0;
+  color: #666;
+}
+
+.td-acoes {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-excluir {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #fff0f0;
+  color: #ff1744;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.btn-excluir:hover {
+  background: #ff1744;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .gerenciar-usuarios-page .admin-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .gerenciar-usuarios-page .titulo {
+    font-size: 1.5rem;
+  }
+
+  .filtros-container {
+    flex-direction: column;
+  }
+
+  .search-box {
+    min-width: 100%;
+  }
+
+  .usuarios-table th,
+  .usuarios-table td {
+    padding: 12px 8px;
+    font-size: 0.85rem;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+
+  .td-user {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
