@@ -149,7 +149,7 @@ export default function EventoDetail() {
                     onClick={() => navigate("/pagamento/cartao")}
                     disabled={evento.ingressos_disponiveis === 0}
                   >
-                    Cartão de Crédito
+                    Cartão de Crédito e Débito
                   </button>
                 </div>
 

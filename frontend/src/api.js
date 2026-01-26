@@ -92,13 +92,25 @@ function eventoParaBackend(evento) {
       evento.ingressos_totais ||
       0,
     price: evento.price || evento.preco || 0,
+    category: evento.categoria || evento.category || "outros",
   };
   if (!payload.image) delete payload.image;
   return payload;
 }
 
+function formatarImagemUrl(imagem) {
+  if (!imagem) return "";
+  // Se já é uma URL completa, retorna como está
+  if (imagem.startsWith("http://") || imagem.startsWith("https://")) {
+    return imagem;
+  }
+  // Se é um caminho relativo, adiciona o prefixo do backend
+  return `${API_BASE}${imagem}`;
+}
+
 function eventoParaFrontend(evento) {
   if (!evento) return null;
+  const imagemOriginal = evento.image || evento.imagem;
   return {
     id: evento.id,
     nome: evento.name || evento.nome,
@@ -106,14 +118,14 @@ function eventoParaFrontend(evento) {
     data: evento.date || evento.data,
     horario: evento.time || evento.horario,
     local: evento.location || evento.local,
-    imagem: evento.image || evento.imagem,
+    imagem: formatarImagemUrl(imagemOriginal),
     ingressos_disponiveis:
       evento.available_tickets ?? evento.ingressos_disponiveis,
     total_tickets: evento.total_tickets,
     preco: evento.price ?? evento.preco ?? 0,
     price: evento.price ?? evento.preco ?? 0,
     available_tickets: evento.available_tickets,
-    categoria: evento.categoria || "outros",
+    categoria: evento.category || evento.categoria || "outros",
   };
 }
 
@@ -230,6 +242,10 @@ export async function confirmarCompra(purchase_id) {
   return apiPost(`/compras/${purchase_id}/confirmar`, {});
 }
 
+export async function listarMinhasCompras() {
+  return apiGet("/compras/minhas");
+}
+
 // ========================
 // Relatórios
 // ========================
@@ -255,7 +271,7 @@ export async function exportarRelatorioCSV() {
 
 export async function exportarRelatorioPDF() {
   const token = localStorage.getItem("accessToken");
-  const res = await fetch(`${API_BASE}/reports/exportar-pdf`, {
+  const res = await fetch(`${API_BASE}/reports/exportar-pdf-avancado`, {
     method: "GET",
     headers: {
       Authorization: token ? `Bearer ${token}` : "",
@@ -305,6 +321,7 @@ const api = {
   fazerLogin,
   iniciarCompra,
   confirmarCompra,
+  listarMinhasCompras,
   obterDashboardCompleto,
   exportarRelatorioCSV,
   exportarRelatorioPDF,

@@ -60,10 +60,6 @@ export default function CadastroAdm() {
       </form>
 
       {erro && <p className="erro">{erro}</p>}
-
-      <Link to="/admin/eventos" className="voltar-link">
-        ← Voltar para Gerenciar Eventos
-      </Link>
     </div>
   );
 }

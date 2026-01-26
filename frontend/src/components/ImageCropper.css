@@ -1,0 +1,127 @@
+.cropper-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.cropper-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.cropper-modal h3 {
+  margin: 0 0 16px;
+  color: #6a0dad;
+  text-align: center;
+  font-size: 1.4rem;
+}
+
+.cropper-container {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cropper-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  padding: 0 10px;
+}
+
+.cropper-controls label {
+  font-weight: 600;
+  color: #444;
+  min-width: 50px;
+}
+
+.zoom-slider {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: #e0e0e0;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.zoom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6a0dad, #8b5cf6);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(106, 13, 173, 0.4);
+}
+
+.zoom-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6a0dad, #8b5cf6);
+  cursor: pointer;
+  border: none;
+}
+
+.cropper-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn-cancel-crop {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #e0e0e0;
+  color: #444;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel-crop:hover {
+  background: #d0d0d0;
+}
+
+.btn-confirm-crop {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6a0dad, #8b5cf6);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-confirm-crop:hover {
+  background: linear-gradient(135deg, #5c0d9a, #7c4dff);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 500px) {
+  .cropper-container {
+    height: 280px;
+  }
+  
+  .cropper-modal {
+    padding: 16px;
+  }
+}

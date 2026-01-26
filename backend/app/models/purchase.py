@@ -17,7 +17,7 @@ class Purchase(Base):
 
     # Relacionamentos
     user = relationship("User", back_populates="purchases")
-    event = relationship("Event")
+    event = relationship("Event", back_populates="purchases")
     
     # CORREÇÃO: Esta linha permite que o Ticket aponte para cá via back_populates
     tickets = relationship("Ticket", back_populates="purchase", cascade="all, delete-orphan")

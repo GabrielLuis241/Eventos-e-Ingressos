@@ -11,6 +11,7 @@ export default function EventoDetail() {
 
   const [quantidade, setQuantidade] = useState(1);
   const [mensagem, setMensagem] = useState(null);
+  const [mostrarOpcaoCartao, setMostrarOpcaoCartao] = useState(false);
 
   const usuarioLogado = localStorage.getItem("usuarioLogado");
   const estaLogado = !!usuarioLogado;
@@ -62,15 +63,16 @@ export default function EventoDetail() {
     }
   };
 
-  const handleCartao = async () => {
+  const handleCartao = async (tipoCartao) => {
     try {
-      const compra = await iniciarCompra(evento.id, quantidade, "cartao");
-      // Redirecionar para página Cartão com ID da compra
-      navigate(`/pagamento/cartao/${compra.id}`, { state: { compra, evento } });
+      const compra = await iniciarCompra(evento.id, quantidade, tipoCartao);
+      // Redirecionar para página Cartão com ID da compra e tipo
+      navigate(`/pagamento/cartao/${compra.id}`, { state: { compra, evento, tipoCartao } });
     } catch (err) {
       console.error(err);
       setMensagem('Erro ao iniciar compra: ' + err.message);
     }
+    setMostrarOpcaoCartao(false);
   };
 
   return (
@@ -137,12 +139,34 @@ export default function EventoDetail() {
                 <button
                   type="button"
                   className="btn btn-cartao"
-                  onClick={handleCartao}
+                  onClick={() => setMostrarOpcaoCartao(!mostrarOpcaoCartao)}
                   disabled={evento.ingressos_disponiveis === 0}
                 >
-                  Cartão de Crédito
+                  Cartão de Crédito/Débito
                 </button>
               </div>
+
+              {mostrarOpcaoCartao && (
+                <div className="opcoes-cartao">
+                  <p>Selecione o tipo de cartão:</p>
+                  <div className="botoes-tipo-cartao">
+                    <button
+                      type="button"
+                      className="btn btn-credito"
+                      onClick={() => handleCartao("credito")}
+                    >
+                      💳 Crédito
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-debito"
+                      onClick={() => handleCartao("debito")}
+                    >
+                      💳 Débito
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {mensagem && (
                 <div className={`message ${mensagem.includes('Erro') ? 'erro' : 'sucesso'}`}>

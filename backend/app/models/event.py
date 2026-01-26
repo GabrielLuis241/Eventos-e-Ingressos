@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, Float # Adicionado Float
+from sqlalchemy.orm import relationship
 from app.database import Base
 
 class Event(Base):
@@ -13,4 +14,8 @@ class Event(Base):
     image = Column(String)
     total_tickets = Column(Integer)
     available_tickets = Column(Integer)
-    price = Column(Float, default=0.0) # Novo campo essencial para vendas
+    price = Column(Float, default=0.0)
+    category = Column(String, default="outros")  # Categoria do evento
+    
+    # Relacionamento com compras
+    purchases = relationship("Purchase", back_populates="event")
