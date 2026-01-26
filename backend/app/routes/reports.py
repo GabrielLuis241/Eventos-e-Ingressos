@@ -44,7 +44,8 @@ def filtrar_por_periodo(query, model_attr, periodo: str):
         return query.filter(model_attr >= hoje - timedelta(days=15))
     elif periodo == "30dias":
         return query.filter(model_attr >= hoje - timedelta(days=30))
-
+    
+    return query
 
 # --- 1. DASHBOARD E GRÁFICOS (US15) ---
 
