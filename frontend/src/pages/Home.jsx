@@ -196,9 +196,6 @@ export default function Home() {
                       <Link to="/admin/eventos" className="nav-btn">
                         Gerenciar Eventos
                       </Link>
-                      <Link to="/relatorios" className="nav-btn">
-                        Relatórios
-                      </Link>
                     </>
                   ) : (
                     <Link to="/perfil" className="nav-btn">

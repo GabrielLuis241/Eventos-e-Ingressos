@@ -253,9 +253,18 @@ export async function obterDashboardCompleto() {
   return apiGet("/reports/dashboard-completo");
 }
 
-export async function exportarRelatorioCSV() {
+export async function exportarRelatorioCSV(filtros = {}) {
   const token = localStorage.getItem("accessToken");
-  const res = await fetch(`${API_BASE}/reports/exportar-csv`, {
+
+  const params = new URLSearchParams();
+  if (filtros.evento && filtros.evento !== "todos") {
+    params.append("evento", filtros.evento);
+  }
+  if (filtros.periodo && filtros.periodo !== "todos") {
+    params.append("periodo", filtros.periodo);
+  }
+
+  const res = await fetch(`${API_BASE}/reports/exportar-csv?${params.toString()}`, {
     method: "GET",
     headers: {
       Authorization: token ? `Bearer ${token}` : "",
@@ -269,9 +278,18 @@ export async function exportarRelatorioCSV() {
   return res.blob();
 }
 
-export async function exportarRelatorioPDF() {
+export async function exportarRelatorioPDF(filtros = {}) {
   const token = localStorage.getItem("accessToken");
-  const res = await fetch(`${API_BASE}/reports/exportar-pdf-avancado`, {
+
+  const params = new URLSearchParams();
+  if (filtros.evento && filtros.evento !== "todos") {
+    params.append("evento", filtros.evento);
+  }
+  if (filtros.periodo && filtros.periodo !== "todos") {
+    params.append("periodo", filtros.periodo);
+  }
+
+  const res = await fetch(`${API_BASE}/reports/exportar-pdf-avancado?${params.toString()}`, {
     method: "GET",
     headers: {
       Authorization: token ? `Bearer ${token}` : "",
@@ -285,9 +303,10 @@ export async function exportarRelatorioPDF() {
   return res.blob();
 }
 
-export async function exportarRelatorioExcel() {
+export async function exportarRelatorioExcel(filtros = {}) {
   const token = localStorage.getItem("accessToken");
-  const res = await fetch(`${API_BASE}/reports/exportar-excel`, {
+  const query = new URLSearchParams(filtros).toString();
+  const res = await fetch(`${API_BASE}/reports/exportar-excel?${query}`, {
     method: "GET",
     headers: {
       Authorization: token ? `Bearer ${token}` : "",
@@ -300,6 +319,7 @@ export async function exportarRelatorioExcel() {
 
   return res.blob();
 }
+
 
 // ========================
 // Export default
