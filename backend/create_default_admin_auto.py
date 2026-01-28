@@ -12,6 +12,7 @@ from app.database import SessionLocal, engine, Base
 from app.models.user import User
 from app.models.purchase import Purchase
 from app.models.event import Event
+from app.models.ticket import Ticket
 from app.services.user_service import get_password_hash
 from sqlalchemy.orm import Session
 

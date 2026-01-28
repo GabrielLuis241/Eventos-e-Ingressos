@@ -30,25 +30,30 @@ class UserResponse(BaseModel):
 
 @router.get("/usuarios", response_model=List[UserResponse])
 def listar_usuarios(db: Session = Depends(get_db)):
-    """Lista todos os usuários cadastrados"""
+    """Lista todos os usuários cadastrados com tradução de tipo para o Front"""
     usuarios = db.query(User).all()
     
-    # Formatar resposta garantindo que o esquema valide
     resultado = []
     for user in usuarios:
+        # Lógica de tradução para visualização:
+        # Se no banco for 'organizador', o Front receberá 'admin'
+        exibir_tipo = user.user_type
+        if exibir_tipo == "organizador":
+            exibir_tipo = "admin"
+
         resultado.append({
             "id": user.id,
             "username": user.username,
             "email": user.email,
-            "user_type": user.user_type,
-            "created_at": None  # Definido como None explicitamente
+            "user_type": exibir_tipo,
+            "created_at": None  
         })
     
     return resultado
 
 @router.get("/usuarios/{user_id}", response_model=UserResponse)
 def buscar_usuario(user_id: int, db: Session = Depends(get_db)):
-    """Busca um usuário pelo ID"""
+    """Busca um usuário pelo ID com tradução de tipo"""
     user = db.query(User).filter(User.id == user_id).first()
     
     if not user:
@@ -57,11 +62,15 @@ def buscar_usuario(user_id: int, db: Session = Depends(get_db)):
             detail="Usuário não encontrado"
         )
     
+    exibir_tipo = user.user_type
+    if exibir_tipo == "organizador":
+        exibir_tipo = "admin"
+    
     return {
         "id": user.id,
         "username": user.username,
         "email": user.email,
-        "user_type": user.user_type,
+        "user_type": exibir_tipo,
         "created_at": None
     }
 
