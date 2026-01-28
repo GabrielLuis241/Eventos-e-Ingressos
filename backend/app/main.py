@@ -5,7 +5,7 @@ import os
 
 from app.database import Base, engine
 from app import models 
-from app.routes import public_events, purchases, tickets, admin_events, reports, auth
+from app.routes import public_events, purchases, tickets, admin_events, admin_users, reports, auth
 
 # Cria as tabelas no banco de dados
 Base.metadata.create_all(bind=engine)
@@ -36,4 +36,5 @@ app.include_router(public_events.router)
 app.include_router(purchases.router)
 app.include_router(tickets.router)
 app.include_router(admin_events.router)
+app.include_router(admin_users.router)
 app.include_router(reports.router)
