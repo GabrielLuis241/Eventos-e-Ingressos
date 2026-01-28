@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -16,13 +16,14 @@ def get_db():
     finally:
         db.close()
 
-# Schema para resposta de usuário
+# Schema para resposta de usuário corrigido
 class UserResponse(BaseModel):
     id: int
     username: str
     email: str
     user_type: str
-    created_at: str = None
+    # Usando Optional para permitir que o valor seja None (vazio)
+    created_at: Optional[str] = None 
 
     class Config:
         from_attributes = True
@@ -32,7 +33,7 @@ def listar_usuarios(db: Session = Depends(get_db)):
     """Lista todos os usuários cadastrados"""
     usuarios = db.query(User).all()
     
-    # Formatar resposta
+    # Formatar resposta garantindo que o esquema valide
     resultado = []
     for user in usuarios:
         resultado.append({
@@ -40,7 +41,7 @@ def listar_usuarios(db: Session = Depends(get_db)):
             "username": user.username,
             "email": user.email,
             "user_type": user.user_type,
-            "created_at": None  # O modelo atual não tem campo de data de criação
+            "created_at": None  # Definido como None explicitamente
         })
     
     return resultado
@@ -74,9 +75,6 @@ def deletar_usuario(user_id: int, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Usuário não encontrado"
         )
-    
-    # Não permitir que o admin exclua a si mesmo (proteção básica)
-    # Em produção, você verificaria o token JWT para isso
     
     db.delete(user)
     db.commit()
